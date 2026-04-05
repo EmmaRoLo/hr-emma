@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-GMAIL_USER = os.getenv('GMAIL_USER', 'emmanuel.rdrlp@gmail.com')
+GMAIL_USER = os.getenv('GMAIL_USER', 'koda1milo@gmail.com')
 RESEND_API_KEY = os.getenv('RESEND_API_KEY', '')
 DASHBOARD_PORT = int(os.getenv('DASHBOARD_PORT', 5050))
 NGROK_STATIC_DOMAIN = os.getenv('NGROK_STATIC_DOMAIN', '')

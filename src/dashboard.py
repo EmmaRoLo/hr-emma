@@ -87,6 +87,17 @@ def status():
     })
 
 
+@app.route('/admin/send-digest', methods=['POST'])
+def send_digest():
+    """Manually trigger email digest for all pending jobs."""
+    from src.mailer import send_job_digest
+    jobs = get_pending_jobs()
+    if not jobs:
+        return jsonify({'ok': False, 'message': 'No pending jobs to send'})
+    ok = send_job_digest(jobs)
+    return jsonify({'ok': ok, 'message': f'Digest sent with {len(jobs)} jobs' if ok else 'Failed to send'})
+
+
 @app.route('/download/tracker')
 def download_tracker():
     """Download the Excel tracker file."""

@@ -7,6 +7,7 @@ Uses claude-sonnet-4-6 to tailor content to the specific job description.
 import json
 import os
 import re
+import subprocess
 import sys
 from datetime import datetime
 
@@ -154,6 +155,34 @@ Location: {job.get('location', '')}
 
 def _safe_filename(text: str) -> str:
     return re.sub(r'[^\w\-]', '_', text)[:30]
+
+
+def _docx_to_pdf(docx_path: str) -> str | None:
+    """Convert a .docx to .pdf using LibreOffice. Returns pdf path or None on failure."""
+    import shutil
+    lo = shutil.which('libreoffice') or shutil.which('soffice')
+    if not lo:
+        print(f"[generator] LibreOffice not found in PATH — sending DOCX", flush=True)
+        return None
+    try:
+        out_dir = os.path.dirname(docx_path)
+        print(f"[generator] Converting to PDF: {docx_path}", flush=True)
+        result = subprocess.run(
+            [lo, '--headless', '--convert-to', 'pdf', '--outdir', out_dir, docx_path],
+            capture_output=True, text=True, timeout=60
+        )
+        print(f"[generator] LO returncode={result.returncode} stdout={result.stdout[:100]} stderr={result.stderr[:100]}", flush=True)
+        if result.returncode == 0:
+            pdf_path = docx_path.replace('.docx', '.pdf')
+            if os.path.exists(pdf_path):
+                print(f"[generator] PDF created: {pdf_path}", flush=True)
+                return pdf_path
+            print(f"[generator] PDF file not found after conversion", flush=True)
+        else:
+            print(f"[generator] PDF conversion failed rc={result.returncode}: {result.stderr[:200]}", flush=True)
+    except Exception as e:
+        print(f"[generator] PDF conversion error: {e}", flush=True)
+    return None
 
 
 # --- DOCX builders ---
@@ -420,8 +449,12 @@ def generate_and_send(job: dict) -> tuple[str, str]:
             'sign_off': STRUCTURE['sign_off'],
         }
 
-    cv_path = _build_cv_docx(tailored_cv, job)
-    cl_path = _build_cl_docx(tailored_cl, job)
+    cv_docx = _build_cv_docx(tailored_cv, job)
+    cl_docx = _build_cl_docx(tailored_cl, job)
+
+    # Convert to PDF (keep docx as fallback)
+    cv_path = _docx_to_pdf(cv_docx) or cv_docx
+    cl_path = _docx_to_pdf(cl_docx) or cl_docx
 
     # Save PDF copy + update Excel tracker
     try:

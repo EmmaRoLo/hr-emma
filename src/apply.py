@@ -477,30 +477,17 @@ async def apply_to_job(job: dict) -> bool:
 
             # ── No Easy Apply → try external Apply button ─────────────────
             print(f"[apply] No Easy Apply found — looking for external Apply button", flush=True)
-
-            # Debug: log all buttons and links on page
-            try:
-                buttons = await page.query_selector_all('button')
-                for b in buttons[:10]:
-                    label = await b.get_attribute('aria-label') or ''
-                    text = (await b.inner_text())[:40] if await b.is_visible() else '[hidden]'
-                    print(f"[apply] BTN: label={label[:40]!r} text={text!r}", flush=True)
-                links = await page.query_selector_all('a[href*="apply"], a[href*="jobs"]')
-                for lnk in links[:5]:
-                    href = await lnk.get_attribute('href') or ''
-                    text = (await lnk.inner_text())[:30]
-                    print(f"[apply] LINK: {href[:60]!r} text={text!r}", flush=True)
-            except Exception as dbg_e:
-                print(f"[apply] debug error: {dbg_e}", flush=True)
-
             external_url = None
 
             for selector in [
-                'a:has-text("Apply on company website")',
-                'a[aria-label*="Apply on company website" i]',
-                'a[aria-label*="Apply" i]',
-                'button[aria-label*="Apply" i]:not([aria-label*="Easy" i])',
+                'button.jobs-apply-button',
                 'a.jobs-apply-button',
+                'button[aria-label*="Apply on company website" i]',
+                'a[aria-label*="Apply on company website" i]',
+                'button[aria-label*="Apply" i]',
+                'a[aria-label*="Apply" i]',
+                '.jobs-apply-button',
+                'a:has-text("Apply on company website")',
                 'a:has-text("Apply")',
             ]:
                 btn = await page.query_selector(selector)

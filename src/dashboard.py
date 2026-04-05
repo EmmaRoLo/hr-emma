@@ -62,10 +62,15 @@ def action(job_id):
 
     elif action_type == 'approve':
         update_status(job_id, 'approved')
-        if _generate_callback:
-            t = threading.Thread(target=_generate_callback, args=(job,), daemon=True)
+        if _apply_callback:
+            def _apply_with_fallback(job):
+                success = _apply_callback(job)
+                if not success and _generate_callback:
+                    print(f"[dashboard] Apply failed for {job['id']} — generating CV as fallback")
+                    _generate_callback(job)
+            t = threading.Thread(target=_apply_with_fallback, args=(job,), daemon=True)
             t.start()
-        return jsonify({'ok': True, 'status': 'approved', 'message': 'Generando CV personalizado y enviando por email...'})
+        return jsonify({'ok': True, 'status': 'approved', 'message': 'Aplicando en LinkedIn...'})
 
     elif action_type == 'manual':
         update_status(job_id, 'manual')

@@ -477,21 +477,35 @@ async def apply_to_job(job: dict) -> bool:
 
             # ── No Easy Apply → try external Apply button ─────────────────
             print(f"[apply] No Easy Apply found — looking for external Apply button", flush=True)
+
+            # Log all buttons to diagnose selector issue
+            try:
+                all_btns = await page.query_selector_all('button')
+                for b in all_btns[:15]:
+                    try:
+                        lbl = await b.get_attribute('aria-label') or ''
+                        cls = await b.get_attribute('class') or ''
+                        txt = (await b.inner_text()).strip()[:30]
+                        print(f"[apply] BTN cls={cls[:40]!r} lbl={lbl[:60]!r} txt={txt!r}", flush=True)
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+
             external_url = None
 
             for selector in [
-                # Easy apply missed — try broader
+                # LinkedIn logged-in: aria-label contains "Apply to" + "company website"
+                'button[aria-label*="company website" i]',
+                'a[aria-label*="company website" i]',
+                # Broader Apply selectors
                 'button.jobs-apply-button',
                 'a.jobs-apply-button',
                 '.jobs-apply-button',
-                # LinkedIn logged-in external apply selectors
-                'button[data-job-id]',
+                'button[data-tracking-control-name*="apply" i]',
                 'a[data-tracking-control-name*="apply" i]',
-                'button[aria-label*="Apply on company website" i]',
-                'a[aria-label*="Apply on company website" i]',
                 'button[aria-label*="Apply" i]',
                 'a[aria-label*="Apply" i]',
-                # Text-based fallback
                 'a:has-text("Apply on company website")',
                 'button:has-text("Apply on company website")',
                 'a:has-text("Apply")',

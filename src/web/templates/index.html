@@ -46,12 +46,12 @@
       <div class="text-muted small">
         <strong>{{ job.company }}</strong>
         {% if job.location %} · {{ job.location }}{% endif %}
-        {% set loc_lower = (job.location or '')|lower %}
-        {% if 'remote' in loc_lower %}
+        {% set combined = ((job.location or '') + ' ' + (job.description or '')[:300])|lower %}
+        {% if 'remote' in combined %}
           <span class="ms-1 badge" style="background:#dcfce7;color:#166534;font-size:10px">🌍 Remote</span>
-        {% elif 'hybrid' in loc_lower %}
+        {% elif 'hybrid' in combined %}
           <span class="ms-1 badge" style="background:#dbeafe;color:#1e40af;font-size:10px">🔀 Hybrid</span>
-        {% elif 'on-site' in loc_lower or 'onsite' in loc_lower or 'on site' in loc_lower %}
+        {% elif 'on-site' in combined or 'onsite' in combined or 'on site' in combined or 'office' in combined %}
           <span class="ms-1 badge" style="background:#f3f4f6;color:#374151;font-size:10px">🏢 On-site</span>
         {% endif %}
       </div>

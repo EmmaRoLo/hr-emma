@@ -67,15 +67,27 @@ def _send(msg: MIMEMultipart) -> bool:
         print(f"[mailer] BLOCKED — attempted to send to {recipient}. Only self-delivery allowed.")
         return False
 
-    try:
-        ctx = ssl.create_default_context()
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=ctx, timeout=30) as server:
-            server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
-            server.sendmail(GMAIL_USER, GMAIL_USER, msg.as_string())
-        return True
-    except Exception as e:
-        print(f"[mailer] Failed to send email: {e}")
-        return False
+    # Try port 587 (STARTTLS) first — works on most cloud providers incl. Railway
+    # Fall back to port 465 (SSL) if 587 fails
+    for attempt, (port, use_ssl) in enumerate([(587, False), (465, True)]):
+        try:
+            if use_ssl:
+                ctx = ssl.create_default_context()
+                with smtplib.SMTP_SSL('smtp.gmail.com', port, context=ctx, timeout=30) as server:
+                    server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
+                    server.sendmail(GMAIL_USER, GMAIL_USER, msg.as_string())
+            else:
+                with smtplib.SMTP('smtp.gmail.com', port, timeout=30) as server:
+                    server.ehlo()
+                    server.starttls(context=ssl.create_default_context())
+                    server.ehlo()
+                    server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
+                    server.sendmail(GMAIL_USER, GMAIL_USER, msg.as_string())
+            print(f"[mailer] Sent via port {port}")
+            return True
+        except Exception as e:
+            print(f"[mailer] Port {port} failed: {e}")
+    return False
 
 
 def _score_badge(score: int) -> str:

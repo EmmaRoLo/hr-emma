@@ -480,15 +480,22 @@ async def apply_to_job(job: dict) -> bool:
             external_url = None
 
             for selector in [
+                # Easy apply missed — try broader
                 'button.jobs-apply-button',
                 'a.jobs-apply-button',
+                '.jobs-apply-button',
+                # LinkedIn logged-in external apply selectors
+                'button[data-job-id]',
+                'a[data-tracking-control-name*="apply" i]',
                 'button[aria-label*="Apply on company website" i]',
                 'a[aria-label*="Apply on company website" i]',
                 'button[aria-label*="Apply" i]',
                 'a[aria-label*="Apply" i]',
-                '.jobs-apply-button',
+                # Text-based fallback
                 'a:has-text("Apply on company website")',
+                'button:has-text("Apply on company website")',
                 'a:has-text("Apply")',
+                'button:has-text("Apply")',
             ]:
                 btn = await page.query_selector(selector)
                 if btn:

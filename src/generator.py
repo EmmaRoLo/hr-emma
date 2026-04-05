@@ -23,6 +23,7 @@ load_dotenv()
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from src.database import update_status
 from src.mailer import send_manual_package
+from src.tracker import record_sent_cv, EXCEL_PATH
 from templates.master_cover_letter import HEADER, SHORT_VERSION, STRUCTURE, AREA_KEYWORDS
 from templates.master_cv import (
     CORE_COMPETENCIES, EDUCATION, EXPERIENCE, LANGUAGES, PROFILE,
@@ -422,7 +423,15 @@ def generate_and_send(job: dict) -> tuple[str, str]:
     cv_path = _build_cv_docx(tailored_cv, job)
     cl_path = _build_cl_docx(tailored_cl, job)
 
-    send_manual_package(job, cv_path, cl_path)
+    # Save PDF copy + update Excel tracker
+    try:
+        record_sent_cv(job, cv_path)
+    except Exception as e:
+        print(f"[generator] Tracker error (non-fatal): {e}")
+
+    # Send email with CV, cover letter, and Excel tracker attached
+    excel = EXCEL_PATH if os.path.exists(EXCEL_PATH) else None
+    send_manual_package(job, cv_path, cl_path, excel_path=excel)
     update_status(job['id'], 'sent')
 
     return cv_path, cl_path

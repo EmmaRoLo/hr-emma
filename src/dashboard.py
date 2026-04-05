@@ -7,7 +7,7 @@ import os
 import sys
 import threading
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_file
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from src.database import get_all_non_pending, get_job, get_pending_jobs, update_status
@@ -85,6 +85,15 @@ def status():
         'ok': True,
         'pending': len(pending),
     })
+
+
+@app.route('/download/tracker')
+def download_tracker():
+    """Download the Excel tracker file."""
+    from src.tracker import EXCEL_PATH
+    if not os.path.exists(EXCEL_PATH):
+        return 'No hay CVs enviados todavía.', 404
+    return send_file(EXCEL_PATH, as_attachment=True, download_name='Seguimiento Jobs.xlsx')
 
 
 @app.route('/admin/cookie', methods=['GET', 'POST'])

@@ -163,7 +163,7 @@ def send_job_digest(jobs: list[dict]) -> bool:
     return ok
 
 
-def send_manual_package(job: dict, cv_path: str, cl_path: str) -> bool:
+def send_manual_package(job: dict, cv_path: str, cl_path: str, excel_path: str = None) -> bool:
     """
     Send tailored CV + cover letter to Emmanuel for a manual application.
     cv_path: path to .docx CV file
@@ -205,7 +205,10 @@ def send_manual_package(job: dict, cv_path: str, cl_path: str) -> bool:
     msg['To'] = GMAIL_USER
     msg.attach(MIMEText(html, 'html'))
 
-    for path, label in [(cv_path, 'CV'), (cl_path, 'CoverLetter')]:
+    attachments = [(cv_path, 'CV'), (cl_path, 'CoverLetter')]
+    if excel_path:
+        attachments.append((excel_path, 'Seguimiento'))
+    for path, label in attachments:
         if path and os.path.exists(path):
             with open(path, 'rb') as f:
                 part = MIMEApplication(f.read(), Name=os.path.basename(path))

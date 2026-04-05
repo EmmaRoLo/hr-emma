@@ -301,4 +301,13 @@ async def apply_to_job(job: dict) -> bool:
 
 def apply_sync(job: dict) -> bool:
     """Synchronous wrapper for use in threads."""
-    return asyncio.run(apply_to_job(job))
+    import traceback
+    print(f"[apply] apply_sync called for {job.get('id')} — playwright={_PLAYWRIGHT_AVAILABLE}", flush=True)
+    try:
+        result = asyncio.run(apply_to_job(job))
+        print(f"[apply] apply_sync finished: result={result}", flush=True)
+        return result
+    except Exception as e:
+        print(f"[apply] apply_sync EXCEPTION: {e}", flush=True)
+        traceback.print_exc()
+        return False

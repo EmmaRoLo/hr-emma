@@ -64,7 +64,14 @@ def action(job_id):
         update_status(job_id, 'approved')
         if _apply_callback:
             def _apply_with_fallback(job):
-                success = _apply_callback(job)
+                import traceback
+                print(f"[dashboard] apply thread started for {job['id']}", flush=True)
+                try:
+                    success = _apply_callback(job)
+                except Exception as e:
+                    print(f"[dashboard] _apply_callback EXCEPTION: {e}", flush=True)
+                    traceback.print_exc()
+                    success = False
                 if not success and _generate_callback:
                     print(f"[dashboard] Apply failed for {job['id']} — generating CV as fallback")
                     _generate_callback(job)

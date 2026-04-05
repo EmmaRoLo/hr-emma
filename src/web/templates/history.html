@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h4 class="mb-4 fw-bold">Historial de aplicaciones</h4>
+
+{% if not jobs %}
+<div class="text-center py-5 text-muted">
+  <p class="fs-5">No hay historial aún.</p>
+</div>
+{% endif %}
+
+<table class="table table-hover bg-white rounded shadow-sm" style="border-radius:12px;overflow:hidden">
+  <thead style="background:#f3f4f6">
+    <tr>
+      <th>Posición</th>
+      <th>Empresa</th>
+      <th>Ubicación</th>
+      <th class="text-center">Score</th>
+      <th class="text-center">Estado</th>
+      <th>Fecha</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for job in jobs %}
+    {% set score = job.score|int %}
+    {% if score >= 65 %}{% set badge_class = 'score-high' %}
+    {% elif score >= 40 %}{% set badge_class = 'score-mid' %}
+    {% else %}{% set badge_class = 'score-low' %}{% endif %}
+
+    {% set status = job.status %}
+    {% if status == 'applied' %}{% set pill = 'pill-applied' %}{% set label = '✅ Aplicado' %}
+    {% elif status == 'sent' %}{% set pill = 'pill-sent' %}{% set label = '📄 CV enviado' %}
+    {% elif status == 'manual' %}{% set pill = 'pill-manual' %}{% set label = '⏳ Manual' %}
+    {% elif status == 'skipped' %}{% set pill = 'pill-skipped' %}{% set label = '✖ Saltado' %}
+    {% elif status == 'approved' %}{% set pill = 'pill-approved' %}{% set label = '🔄 Aprobado' %}
+    {% else %}{% set pill = 'pill-pending' %}{% set label = status %}{% endif %}
+
+    <tr>
+      <td>
+        <a href="{{ job.url }}" target="_blank" class="text-decoration-none fw-semibold">
+          {{ job.title }}
+        </a>
+      </td>
+      <td>{{ job.company }}</td>
+      <td class="text-muted small">{{ job.location }}</td>
+      <td class="text-center"><span class="score-badge {{ badge_class }}">{{ score }}</span></td>
+      <td class="text-center"><span class="status-pill {{ pill }}">{{ label }}</span></td>
+      <td class="text-muted small">{{ job.found_at[:16] if job.found_at else '' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

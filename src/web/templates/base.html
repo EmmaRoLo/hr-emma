@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HR Emma — Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f0f4f8; font-family: 'Segoe UI', Arial, sans-serif; }
+    .navbar-brand { font-weight: 800; letter-spacing: -0.5px; }
+    .score-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-weight: 700; font-size: 13px; color: white; }
+    .score-high { background: #22c55e; }
+    .score-mid  { background: #f59e0b; }
+    .score-low  { background: #ef4444; }
+    .job-card { background: white; border-radius: 12px; border: none; box-shadow: 0 1px 4px rgba(0,0,0,.07); margin-bottom: 16px; transition: box-shadow .2s; }
+    .job-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.12); }
+    .btn-approve { background: #16a34a; color: white; border: none; }
+    .btn-approve:hover { background: #15803d; color: white; }
+    .btn-manual  { background: #2563eb; color: white; border: none; }
+    .btn-manual:hover  { background: #1d4ed8; color: white; }
+    .btn-skip    { background: #e5e7eb; color: #374151; border: none; }
+    .btn-skip:hover { background: #d1d5db; }
+    .status-pill { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+    .pill-applied  { background:#dcfce7; color:#166534 }
+    .pill-sent     { background:#dbeafe; color:#1e40af }
+    .pill-skipped  { background:#f3f4f6; color:#6b7280 }
+    .pill-manual   { background:#ede9fe; color:#6d28d9 }
+    .pill-approved { background:#d1fae5; color:#065f46 }
+    .pill-pending  { background:#fef9c3; color:#92400e }
+    .class-badge   { display:inline-block; padding:2px 9px; border-radius:12px; font-size:11px; font-weight:700; }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-dark" style="background:linear-gradient(135deg,#1e3a5f,#2563eb)">
+    <div class="container">
+      <a class="navbar-brand" href="/">🎯 HR Emma</a>
+      <div class="d-flex gap-3">
+        <a href="/" class="nav-link text-white {% if page=='pending' %}fw-bold{% endif %}">Pendientes</a>
+        <a href="/history" class="nav-link text-white {% if page=='history' %}fw-bold{% endif %}">Historial</a>
+        <a href="/status" class="nav-link text-white opacity-75" target="_blank">API</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+    {% block content %}{% endblock %}
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function doAction(jobId, action) {
+      const card = document.getElementById('card-' + jobId);
+      const btns = card.querySelectorAll('button');
+      btns.forEach(b => b.disabled = true);
+
+      fetch('/action/' + jobId, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action: action})
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.ok) {
+          card.style.opacity = '0.4';
+          card.style.transition = 'opacity .4s';
+          setTimeout(() => card.remove(), 500);
+          const counter = document.getElementById('pending-count');
+          if (counter) counter.textContent = parseInt(counter.textContent) - 1;
+          if (data.message) showToast(data.message);
+        }
+      })
+      .catch(e => { btns.forEach(b => b.disabled = false); alert('Error: ' + e); });
+    }
+
+    function showToast(msg) {
+      const t = document.createElement('div');
+      t.className = 'position-fixed bottom-0 end-0 p-3';
+      t.style.zIndex = 9999;
+      t.innerHTML = `<div class="toast show align-items-center text-white bg-primary border-0">
+        <div class="d-flex"><div class="toast-body">${msg}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.closest('.position-fixed').remove()"></button>
+        </div></div>`;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 4000);
+    }
+  </script>
+</body>
+</html>

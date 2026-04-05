@@ -1,0 +1,12 @@
+.env
+data/jobs.db
+data/seen_ids.json
+data/cookies/linkedin_cookies.json
+output/
+ngrok.exe
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/

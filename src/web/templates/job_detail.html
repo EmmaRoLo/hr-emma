@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% set score = job.score|int %}
+{% if score >= 65 %}{% set badge_class = 'score-high' %}
+{% elif score >= 40 %}{% set badge_class = 'score-mid' %}
+{% else %}{% set badge_class = 'score-low' %}{% endif %}
+
+<div class="mb-3">
+  <a href="/" class="text-muted text-decoration-none">← Volver</a>
+</div>
+
+<div class="job-card p-4" id="card-{{ job.id }}">
+  <div class="d-flex align-items-start justify-content-between gap-3 mb-3">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="score-badge {{ badge_class }}">{{ score }}/100</span>
+        <h5 class="mb-0 fw-bold">{{ job.title }}</h5>
+      </div>
+      <p class="text-muted mb-0"><strong>{{ job.company }}</strong>{% if job.location %} · {{ job.location }}{% endif %}</p>
+      <a href="{{ job.url }}" target="_blank" class="small text-primary">Ver en LinkedIn →</a>
+    </div>
+    <div class="d-flex flex-column gap-2 align-items-end" style="min-width:160px">
+      <button class="btn btn-approve btn-sm w-100" onclick="doAction('{{ job.id }}','approve')">
+        ✅ Auto-Apply
+      </button>
+      <button class="btn btn-manual btn-sm w-100" onclick="doAction('{{ job.id }}','manual')">
+        📄 Manual — CV
+      </button>
+      <button class="btn btn-skip btn-sm w-100" onclick="doAction('{{ job.id }}','skip')">
+        ✖ Skip
+      </button>
+    </div>
+  </div>
+
+  <hr>
+  <h6 class="text-muted mb-2">Descripción completa</h6>
+  <div style="white-space:pre-wrap;font-size:14px;line-height:1.7;max-height:600px;overflow-y:auto">{{ job.description or 'Sin descripción disponible.' }}</div>
+</div>
+
+{% endblock %}

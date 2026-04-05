@@ -479,43 +479,54 @@ async def apply_to_job(job: dict) -> bool:
             print(f"[apply] No Easy Apply found — looking for external Apply button", flush=True)
             external_url = None
 
-            # Open in new tab if Apply opens externally
-            async with context.expect_page() as new_page_info:
-                for selector in [
-                    'a[aria-label*="Apply" i]',
-                    'button[aria-label*="Apply" i]:not([aria-label*="Easy" i])',
-                    'a.jobs-apply-button',
-                    'a:has-text("Apply on company website")',
-                    'a:has-text("Apply")',
-                ]:
-                    btn = await page.query_selector(selector)
-                    if btn:
-                        href = await btn.get_attribute('href')
-                        if href and href.startswith('http'):
-                            external_url = href
-                            break
-                        try:
+            for selector in [
+                'a:has-text("Apply on company website")',
+                'a[aria-label*="Apply on company website" i]',
+                'a[aria-label*="Apply" i]',
+                'button[aria-label*="Apply" i]:not([aria-label*="Easy" i])',
+                'a.jobs-apply-button',
+                'a:has-text("Apply")',
+            ]:
+                btn = await page.query_selector(selector)
+                if btn:
+                    href = await btn.get_attribute('href')
+                    if href and href.startswith('http'):
+                        external_url = href
+                        print(f"[apply] External URL via href: {external_url[:80]}", flush=True)
+                        break
+                    # No href — click and see where we land
+                    try:
+                        async with context.expect_page(timeout=8000) as new_page_info:
                             await btn.click()
-                            break
-                        except Exception:
-                            pass
+                        new_page = await new_page_info.value
+                        await new_page.wait_for_load_state('domcontentloaded', timeout=15000)
+                        external_url = new_page.url
+                        print(f"[apply] External URL via new tab: {external_url[:80]}", flush=True)
+                        success = await _apply_external_portal(new_page, job_id, external_url)
+                        await new_page.close()
+                        if success:
+                            update_status(job_id, 'applied')
+                        else:
+                            update_status(job_id, 'manual')
+                        await browser.close()
+                        return success
+                    except Exception:
+                        # Didn't open new tab — check if page navigated
+                        await _random_delay(1.5, 2.5)
+                        if page.url != url:
+                            external_url = page.url
+                            print(f"[apply] Navigated to: {external_url[:80]}", flush=True)
+                        break
 
-            if external_url:
-                print(f"[apply] External URL found: {external_url[:80]}", flush=True)
-                new_page = await context.new_page()
-                success = await _apply_external_portal(new_page, job_id, external_url)
-                await new_page.close()
-            else:
-                try:
-                    new_page = await new_page_info.value
-                    await new_page.wait_for_load_state('domcontentloaded', timeout=15000)
-                    success = await _apply_external_portal(new_page, job_id, new_page.url)
-                    await new_page.close()
-                except Exception:
-                    print(f"[apply] No apply button found at all for {job_id} — routing to manual", flush=True)
-                    update_status(job_id, 'manual')
-                    await browser.close()
-                    return False
+            if not external_url:
+                print(f"[apply] No apply button found for {job_id} — routing to manual", flush=True)
+                update_status(job_id, 'manual')
+                await browser.close()
+                return False
+
+            new_page = await context.new_page()
+            success = await _apply_external_portal(new_page, job_id, external_url)
+            await new_page.close()
 
             if success:
                 update_status(job_id, 'applied')

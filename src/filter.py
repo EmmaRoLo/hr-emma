@@ -288,11 +288,62 @@ def _score_area(tier: int) -> int:
     return {1: 30, 2: 27, 3: 22}.get(tier, 22)
 
 
+AUSTRIA_KW = ['austria', 'wien', 'vienna', 'graz', 'salzburg', 'linz', 'innsbruck', 'klagenfurt']
+REMOTE_KW  = ['remote', 'work from home', 'wfh', 'anywhere', 'fully remote', 'home office']
+HYBRID_KW  = ['hybrid']
+
+# Countries/regions outside Austria where Emmanuel CANNOT work on-site
+NON_AUSTRIA_KW = [
+    'united kingdom', ' uk ', 'england', 'london', 'manchester', 'birmingham',
+    'germany', 'berlin', 'munich', 'münchen', 'frankfurt', 'hamburg',
+    'france', 'paris', 'netherlands', 'amsterdam', 'spain', 'madrid', 'barcelona',
+    'italy', 'milan', 'rome', 'switzerland', 'zurich', 'zürich', 'geneva',
+    'poland', 'warsaw', 'czech', 'prague', 'hungary', 'budapest',
+    'sweden', 'stockholm', 'denmark', 'copenhagen', 'norway', 'oslo',
+    'finland', 'helsinki', 'belgium', 'brussels', 'portugal', 'lisbon',
+    'ireland', 'dublin', 'romania', 'bucharest', 'croatia', 'slovakia',
+]
+
+
+def _is_location_eligible(location: str, description: str) -> bool:
+    """
+    Hard location filter:
+    - Austria (any work mode)     → eligible
+    - Anywhere explicitly remote  → eligible
+    - EU/UK non-Austria on-site or hybrid → NOT eligible
+    """
+    loc  = location.lower()
+    desc = description[:600].lower()
+    combined = loc + ' ' + desc
+
+    is_austria = any(k in combined for k in AUSTRIA_KW)
+    is_remote  = any(k in combined for k in REMOTE_KW)
+    is_hybrid  = any(k in combined for k in HYBRID_KW)
+
+    # Austria: all modes allowed
+    if is_austria:
+        return True
+
+    # Explicitly remote (anywhere): allowed
+    if is_remote:
+        return True
+
+    # Non-Austria location that is on-site or hybrid: exclude
+    for kw in NON_AUSTRIA_KW:
+        if kw in combined:
+            if is_hybrid and not is_austria:
+                return False
+            if not is_remote:
+                return False
+
+    return True
+
+
 def _score_location(location: str, description: str) -> int:
     loc = (location + ' ' + description[:500]).lower()
-    if any(k in loc for k in ['austria', 'wien', 'vienna', 'graz', 'salzburg', 'linz']):
+    if any(k in loc for k in AUSTRIA_KW):
         return 20
-    if any(k in loc for k in ['remote', 'work from home', 'wfh', 'anywhere']):
+    if any(k in loc for k in REMOTE_KW):
         return 18
     if 'hybrid' in loc:
         return 15
@@ -335,6 +386,10 @@ def score_job(job: dict) -> tuple[int, str, int, int, str]:
     if _is_german_language(description) or _is_german_language(title):
         return 0, 'excluded', 0, 0, 'Skip'
     if _requires_german(full_text):
+        return 0, 'excluded', 0, 0, 'Skip'
+
+    # Hard-exclude: location not eligible (non-Austria, non-remote)
+    if not _is_location_eligible(location, description):
         return 0, 'excluded', 0, 0, 'Skip'
 
     # Detect language label

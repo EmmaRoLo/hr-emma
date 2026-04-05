@@ -383,12 +383,18 @@ async def apply_to_job(job: dict) -> bool:
             # Wait for LinkedIn job page to fully render (Apply button loads via JS)
             try:
                 await page.wait_for_selector(
-                    '.jobs-unified-top-card, .job-details-jobs-unified-top-card__job-title, .jobs-details__main-content',
-                    timeout=10000
+                    '.jobs-unified-top-card, .job-details-jobs-unified-top-card__job-title, '
+                    '.jobs-details__main-content, .jobs-apply-button, '
+                    'button[aria-label*="Apply" i]',
+                    timeout=12000
                 )
             except Exception:
-                pass  # Continue anyway — maybe different layout
-            await _random_delay(3.0, 5.0)
+                pass  # Continue anyway
+            # Scroll down to trigger lazy-loaded content
+            await page.evaluate("window.scrollBy(0, 400)")
+            await _random_delay(2.0, 3.0)
+            await page.evaluate("window.scrollBy(0, -200)")
+            await _random_delay(1.0, 2.0)
 
             current_url = page.url
             page_title = await page.title()

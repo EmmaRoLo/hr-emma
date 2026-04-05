@@ -171,8 +171,12 @@ async def apply_to_job(job: dict) -> bool:
         update_status(job_id, 'manual')
         return False
 
+    print(f"[apply] Starting browser for job {job_id}: {job.get('title')} @ {job.get('company')}")
     async with async_playwright() as pw:
-        browser = await pw.chromium.launch(headless=True)
+        browser = await pw.chromium.launch(
+            headless=True,
+            args=['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+        )
         context = await browser.new_context(
             user_agent=(
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '

@@ -69,7 +69,7 @@ def _send(msg: MIMEMultipart) -> bool:
 
     try:
         ctx = ssl.create_default_context()
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=ctx) as server:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=ctx, timeout=30) as server:
             server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
             server.sendmail(GMAIL_USER, GMAIL_USER, msg.as_string())
         return True

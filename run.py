@@ -62,19 +62,18 @@ def main():
     init_db()
     print("[run] Database initialized.")
 
-    # On Railway, write cookies from env var if cookies file is missing
+    # Always write cookie from env var if set — ensures Railway picks up updates
     cookies_path = 'data/cookies/linkedin_cookies.json'
-    if not os.path.exists(cookies_path):
-        li_at = os.getenv('LINKEDIN_COOKIE', '')
-        if li_at:
-            import json as _json
-            with open(cookies_path, 'w') as f:
-                _json.dump([{
-                    "name": "li_at", "value": li_at,
-                    "domain": ".www.linkedin.com", "path": "/",
-                    "httpOnly": True, "secure": True, "session": False
-                }], f)
-            print("[run] LinkedIn cookie written from env var.")
+    li_at = os.getenv('LINKEDIN_COOKIE', '')
+    if li_at:
+        import json as _json
+        with open(cookies_path, 'w') as f:
+            _json.dump([{
+                "name": "li_at", "value": li_at,
+                "domain": ".www.linkedin.com", "path": "/",
+                "httpOnly": True, "secure": True, "session": False
+            }], f)
+        print("[run] LinkedIn cookie written from env var.")
 
     if args.test_mail:
         from src.mailer import send_test

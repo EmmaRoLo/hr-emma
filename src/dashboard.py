@@ -63,10 +63,15 @@ def action(job_id):
     elif action_type == 'approve':
         update_status(job_id, 'approved')
         if _apply_callback:
-            # Run apply in background thread so dashboard stays responsive
-            t = threading.Thread(target=_apply_callback, args=(job,), daemon=True)
+            def _apply_with_fallback(job):
+                success = _apply_callback(job)
+                if not success and _generate_callback:
+                    # Playwright unavailable or apply failed — generate CV as fallback
+                    print(f"[dashboard] Apply failed for {job['id']} — generating CV as fallback")
+                    _generate_callback(job)
+            t = threading.Thread(target=_apply_with_fallback, args=(job,), daemon=True)
             t.start()
-        return jsonify({'ok': True, 'status': 'approved', 'message': 'Auto-apply iniciado'})
+        return jsonify({'ok': True, 'status': 'approved', 'message': 'Auto-apply iniciado (o CV generado si no es posible)'})
 
     elif action_type == 'manual':
         update_status(job_id, 'manual')

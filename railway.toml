@@ -1,8 +1,7 @@
 [build]
 builder = "nixpacks"
-buildCommand = "pip install -r requirements.txt && playwright install chromium --with-deps"
 
 [deploy]
-startCommand = "python run.py"
+startCommand = "playwright install chromium --with-deps && python run.py"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3

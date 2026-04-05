@@ -46,12 +46,14 @@
       <div class="text-muted small">
         <strong>{{ job.company }}</strong>
         {% if job.location %} · {{ job.location }}{% endif %}
-        {% set combined = ((job.location or '') + ' ' + (job.description or '')[:300])|lower %}
-        {% if 'remote' in combined %}
-          <span class="ms-1 badge" style="background:#dcfce7;color:#166534;font-size:10px">🌍 Remote</span>
+        {% set combined = ((job.location or '') + ' ' + (job.description or '')[:400])|lower %}
+        {% if 'fully remote' in combined or '100% remote' in combined or 'remote only' in combined or 'work from anywhere' in combined %}
+          <span class="ms-1 badge" style="background:#dcfce7;color:#166534;font-size:10px">🌍 Fully Remote</span>
         {% elif 'hybrid' in combined %}
           <span class="ms-1 badge" style="background:#dbeafe;color:#1e40af;font-size:10px">🔀 Hybrid</span>
-        {% elif 'on-site' in combined or 'onsite' in combined or 'on site' in combined or 'office' in combined %}
+        {% elif 'remote' in combined %}
+          <span class="ms-1 badge" style="background:#d1fae5;color:#065f46;font-size:10px">🌍 Remote</span>
+        {% else %}
           <span class="ms-1 badge" style="background:#f3f4f6;color:#374151;font-size:10px">🏢 On-site</span>
         {% endif %}
       </div>

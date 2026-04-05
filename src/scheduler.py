@@ -51,12 +51,18 @@ def run_pipeline():
     inserted = save_jobs(all_to_insert)
     print(f"[pipeline] Inserted {inserted} new rows to DB")
 
-    # 4. Notify by email if any pending jobs
-    pending = [j for j in to_save if j.get('status') == 'pending']
-    if pending:
-        send_job_digest(pending)
+    # 4. Notify by email — new jobs this run + all pending in DB
+    new_pending = [j for j in to_save if j.get('status') == 'pending']
+    all_pending = get_pending_jobs()
+
+    if new_pending:
+        print(f"[pipeline] Sending digest: {len(new_pending)} new + {len(all_pending)} total pending")
+        send_job_digest(all_pending)
+    elif all_pending:
+        print(f"[pipeline] No new jobs but {len(all_pending)} still pending — sending reminder digest")
+        send_job_digest(all_pending)
     else:
-        print("[pipeline] No qualifying jobs to notify about this run.")
+        print("[pipeline] No pending jobs to notify about.")
 
     log_run(
         jobs_found=len(raw_jobs),

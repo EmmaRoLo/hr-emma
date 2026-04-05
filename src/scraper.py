@@ -5,6 +5,7 @@ LinkedIn job scraper.
 Searches for Director/Sr Manager/Manager roles in Consumer Insights, Analytics,
 Marketing, Commercial, Shopper, and Strategy in Austria or remote.
 """
+from __future__ import annotations
 
 import asyncio
 import json

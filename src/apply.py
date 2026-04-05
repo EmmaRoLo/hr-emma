@@ -3,6 +3,7 @@ LinkedIn Easy Apply automation using Playwright.
 Handles multi-step Easy Apply forms with pre-filled data for Emmanuel.
 Safety guards: CAPTCHA detection, form complexity limit, German detection.
 """
+from __future__ import annotations
 
 import asyncio
 import json

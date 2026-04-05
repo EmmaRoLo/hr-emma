@@ -98,6 +98,19 @@ def status():
     })
 
 
+@app.route('/admin/reset-all', methods=['POST'])
+def reset_all_to_pending():
+    """Reset all non-pending jobs back to pending so they can be re-actioned."""
+    from src.database import _connect
+    with _connect() as conn:
+        result = conn.execute(
+            "UPDATE jobs SET status = 'pending' WHERE status IN ('sent', 'applied', 'manual', 'skipped', 'approved')"
+        )
+        count = result.rowcount
+        conn.commit()
+    return jsonify({'ok': True, 'reset': count})
+
+
 @app.route('/admin/refilter', methods=['POST'])
 def refilter_pending():
     """Re-apply location filter to all pending jobs, skip ineligible ones."""

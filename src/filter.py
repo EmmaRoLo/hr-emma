@@ -305,29 +305,52 @@ NON_AUSTRIA_KW = [
 ]
 
 
+HYBRID_SIGNALS = [
+    'hybrid', 'days in office', 'days in london', 'days a week in',
+    'days per week in', 'on-site days', 'office days',
+]
+
+FULLY_REMOTE_KW = ['fully remote', 'fully-remote', '100% remote', 'remote only',
+                   'remote position', 'remote role', 'remote job', 'remote work',
+                   'work from anywhere', 'anywhere in', 'location: remote',
+                   'remote (', '(remote)', 'remote –', 'remote —']
+
+
 def _is_location_eligible(location: str, description: str) -> bool:
     """
     Hard location filter:
     - Austria (onsite, hybrid, remote)  → eligible
-    - Rest of EU/world (remote only)    → eligible only if explicitly remote
-    - Rest of EU/world (onsite/hybrid)  → NOT eligible
+    - Rest of EU/world: FULLY remote only (no hybrid, no WFH partial)
     """
     loc  = location.lower()
-    desc = description[:600].lower()
+    desc = description[:800].lower()
     combined = loc + ' ' + desc
 
     is_austria = any(k in combined for k in AUSTRIA_KW)
-    is_remote  = any(k in combined for k in REMOTE_KW)
 
     # Austria: all work modes allowed
     if is_austria:
         return True
 
-    # Non-Austria: only allow if explicitly remote
-    if is_remote:
+    # Non-Austria: reject if hybrid signals found
+    is_hybrid = any(k in combined for k in HYBRID_SIGNALS)
+    if is_hybrid:
+        return False
+
+    # Non-Austria: only allow if explicitly FULLY remote
+    is_fully_remote = any(k in combined for k in FULLY_REMOTE_KW)
+    if is_fully_remote:
         return True
 
-    # Everything else (onsite or hybrid outside Austria) → exclude
+    # Fallback: check basic remote keywords but require no location anchor
+    has_non_austria_city = any(k in combined for k in NON_AUSTRIA_KW)
+    is_remote = any(k in combined for k in REMOTE_KW)
+    if is_remote and not has_non_austria_city:
+        return True
+    if is_remote and has_non_austria_city:
+        # Has a specific non-Austria city + remote → likely hybrid or misleading
+        return False
+
     return False
 
 

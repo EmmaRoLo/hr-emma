@@ -13,7 +13,9 @@ from datetime import datetime
 import anthropic
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.shared import Pt, RGBColor
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.shared import Cm, Pt, RGBColor
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -28,6 +30,7 @@ from templates.master_cv import (
 )
 
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), '..', 'output')
+PHOTO_PATH = os.path.join(os.path.dirname(__file__), '..', 'Originales', 'Foto Emma Profesional.png')
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY', ''))
@@ -161,6 +164,21 @@ def _set_font(run, size=11, bold=False, color=None):
         run.font.color.rgb = RGBColor(*color)
 
 
+def _remove_table_borders(table):
+    """Remove all visible borders from a table (invisible layout table)."""
+    tbl = table._tbl
+    tblPr = tbl.find(qn('w:tblPr'))
+    if tblPr is None:
+        tblPr = OxmlElement('w:tblPr')
+        tbl.insert(0, tblPr)
+    tblBorders = OxmlElement('w:tblBorders')
+    for side in ('top', 'left', 'bottom', 'right', 'insideH', 'insideV'):
+        el = OxmlElement(f'w:{side}')
+        el.set(qn('w:val'), 'none')
+        tblBorders.append(el)
+    tblPr.append(tblBorders)
+
+
 def _build_cv_docx(tailored: dict, job: dict) -> str:
     doc = Document()
 
@@ -171,26 +189,39 @@ def _build_cv_docx(tailored: dict, job: dict) -> str:
         section.left_margin = Pt(54)
         section.right_margin = Pt(54)
 
-    # Name
-    h = doc.add_heading(PROFILE['name'], 0)
-    h.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    for run in h.runs:
-        run.font.color.rgb = RGBColor(30, 58, 95)
+    # Header: name+contact on left, photo on right
+    header_table = doc.add_table(rows=1, cols=2)
+    _remove_table_borders(header_table)
+    left_cell = header_table.cell(0, 0)
+    right_cell = header_table.cell(0, 1)
 
-    # Contact line
-    contact_p = doc.add_paragraph()
-    contact_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    # Left: name
+    name_p = left_cell.paragraphs[0]
+    run = name_p.add_run(PROFILE['name'])
+    run.font.size = Pt(20)
+    run.font.bold = True
+    run.font.color.rgb = RGBColor(30, 58, 95)
+
+    # Left: contact
+    contact_p = left_cell.add_paragraph()
     contact_p.paragraph_format.space_after = Pt(2)
     run = contact_p.add_run(
         f"{PROFILE['address']}  |  {PROFILE['phone']}  |  {PROFILE['email']}  |  {PROFILE['linkedin']}"
     )
     _set_font(run, size=9, color=(107, 114, 128))
 
-    auth_p = doc.add_paragraph()
-    auth_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    auth_p.paragraph_format.space_after = Pt(8)
+    # Left: work authorization
+    auth_p = left_cell.add_paragraph()
+    auth_p.paragraph_format.space_after = Pt(4)
     run = auth_p.add_run(PROFILE['work_authorization'])
     _set_font(run, size=9, bold=True, color=(37, 99, 235))
+
+    # Right: photo
+    photo_p = right_cell.paragraphs[0]
+    photo_p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    if os.path.exists(PHOTO_PATH):
+        photo_run = photo_p.add_run()
+        photo_run.add_picture(PHOTO_PATH, width=Cm(2.8))
 
     # Divider
     doc.add_paragraph('─' * 80).paragraph_format.space_after = Pt(2)

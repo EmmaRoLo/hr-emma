@@ -29,12 +29,18 @@ GMAIL_USER = os.getenv('GMAIL_USER', 'emmanuel.rdrlp@gmail.com')
 GMAIL_APP_PASSWORD = os.getenv('GMAIL_APP_PASSWORD', '')
 DASHBOARD_PORT = int(os.getenv('DASHBOARD_PORT', 5050))
 NGROK_STATIC_DOMAIN = os.getenv('NGROK_STATIC_DOMAIN', '')
+RAILWAY_PUBLIC_DOMAIN = os.getenv('RAILWAY_PUBLIC_DOMAIN', '')
 
 
 def _get_dashboard_url() -> str:
-    """Return public ngrok URL if available, else localhost."""
+    """Return best available public URL: Railway > ngrok static > ngrok local API > localhost."""
+    # Railway cloud deployment (auto-injected by Railway)
+    if RAILWAY_PUBLIC_DOMAIN:
+        return f"https://{RAILWAY_PUBLIC_DOMAIN}"
+    # ngrok static domain (local tunnel)
     if NGROK_STATIC_DOMAIN:
         return f"https://{NGROK_STATIC_DOMAIN}"
+    # ngrok dynamic URL (query local ngrok API)
     try:
         import urllib.request
         with urllib.request.urlopen('http://localhost:4040/api/tunnels', timeout=2) as r:

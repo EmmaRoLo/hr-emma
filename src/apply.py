@@ -10,7 +10,12 @@ import os
 import random
 import sys
 
-from playwright.async_api import async_playwright, Page, TimeoutError as PlaywrightTimeout
+try:
+    from playwright.async_api import async_playwright, Page, TimeoutError as PlaywrightTimeout
+    _PLAYWRIGHT_AVAILABLE = True
+except ImportError:
+    _PLAYWRIGHT_AVAILABLE = False
+    PlaywrightTimeout = Exception
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from src.database import update_status
@@ -159,6 +164,11 @@ async def apply_to_job(job: dict) -> bool:
     """
     job_id = job['id']
     url = job.get('url', '')
+
+    if not _PLAYWRIGHT_AVAILABLE:
+        print(f"[apply] Playwright not installed — routing {job_id} to manual.")
+        update_status(job_id, 'manual')
+        return False
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=True)

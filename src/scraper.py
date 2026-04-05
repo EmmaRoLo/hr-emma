@@ -17,7 +17,12 @@ from urllib.parse import urlencode
 
 import requests
 from bs4 import BeautifulSoup
-from playwright.async_api import async_playwright, Page, BrowserContext
+
+try:
+    from playwright.async_api import async_playwright, Page, BrowserContext
+    _PLAYWRIGHT_AVAILABLE = True
+except ImportError:
+    _PLAYWRIGHT_AVAILABLE = False
 
 COOKIES_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'cookies', 'linkedin_cookies.json')
 
@@ -387,6 +392,9 @@ async def scrape_jobs(notify_login_error=None) -> list[dict]:
 
 async def test_auth() -> bool:
     """Quick test to verify LinkedIn cookie authentication works."""
+    if not _PLAYWRIGHT_AVAILABLE:
+        print("[test_auth] Playwright not installed — skipping browser auth test.")
+        return False
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=False)
         context = await browser.new_context()

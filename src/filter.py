@@ -308,9 +308,9 @@ NON_AUSTRIA_KW = [
 def _is_location_eligible(location: str, description: str) -> bool:
     """
     Hard location filter:
-    - Austria (any work mode)     → eligible
-    - Anywhere explicitly remote  → eligible
-    - EU/UK non-Austria on-site or hybrid → NOT eligible
+    - Austria (onsite, hybrid, remote)  → eligible
+    - Rest of EU/world (remote only)    → eligible only if explicitly remote
+    - Rest of EU/world (onsite/hybrid)  → NOT eligible
     """
     loc  = location.lower()
     desc = description[:600].lower()
@@ -318,25 +318,17 @@ def _is_location_eligible(location: str, description: str) -> bool:
 
     is_austria = any(k in combined for k in AUSTRIA_KW)
     is_remote  = any(k in combined for k in REMOTE_KW)
-    is_hybrid  = any(k in combined for k in HYBRID_KW)
 
-    # Austria: all modes allowed
+    # Austria: all work modes allowed
     if is_austria:
         return True
 
-    # Explicitly remote (anywhere): allowed
+    # Non-Austria: only allow if explicitly remote
     if is_remote:
         return True
 
-    # Non-Austria location that is on-site or hybrid: exclude
-    for kw in NON_AUSTRIA_KW:
-        if kw in combined:
-            if is_hybrid and not is_austria:
-                return False
-            if not is_remote:
-                return False
-
-    return True
+    # Everything else (onsite or hybrid outside Austria) → exclude
+    return False
 
 
 def _score_location(location: str, description: str) -> int:

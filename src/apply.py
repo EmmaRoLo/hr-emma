@@ -379,7 +379,16 @@ async def apply_to_job(job: dict) -> bool:
 
         try:
             await page.goto(url, wait_until='domcontentloaded', timeout=25000)
-            await _random_delay(2.0, 4.0)
+
+            # Wait for LinkedIn job page to fully render (Apply button loads via JS)
+            try:
+                await page.wait_for_selector(
+                    '.jobs-unified-top-card, .job-details-jobs-unified-top-card__job-title, .jobs-details__main-content',
+                    timeout=10000
+                )
+            except Exception:
+                pass  # Continue anyway — maybe different layout
+            await _random_delay(3.0, 5.0)
 
             current_url = page.url
             page_title = await page.title()
@@ -406,8 +415,9 @@ async def apply_to_job(job: dict) -> bool:
                 'button:has-text("Easy Apply")',
             ]:
                 easy_apply_btn = await page.query_selector(selector)
-                if easy_apply_btn:
+                if easy_apply_btn and await easy_apply_btn.is_visible():
                     break
+                easy_apply_btn = None
 
             if easy_apply_btn:
                 print(f"[apply] Easy Apply found — proceeding", flush=True)

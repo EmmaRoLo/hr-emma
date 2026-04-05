@@ -1,35 +1,23 @@
 """
-Gmail SMTP mailer for HR Emma notifications.
-
-SECURITY SCOPE — READ BEFORE MODIFYING:
-  Protocol used: SMTP (outbound-only, port 587 with STARTTLS)
-  This module can ONLY:
-    - Send emails FROM gmail_user TO gmail_user (self-notification only)
-  This module can NEVER:
-    - Read, access, or search the inbox (requires IMAP — not configured, not imported)
-    - Send emails to any third party
-    - Access contacts, calendar, Drive, or any other Google service
-    - Modify, delete, or move any emails
-  The App Password grants SMTP send-only access. Google enforces this at the protocol level.
+Mailer for HR Emma notifications — uses Resend API (works on Railway).
+Sends only to the owner's Gmail address (self-notification only).
 """
 
 import os
-import smtplib
-import ssl
 from datetime import datetime
-from email.mime.application import MIMEApplication
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
+import resend
 from dotenv import load_dotenv
 
 load_dotenv()
 
 GMAIL_USER = os.getenv('GMAIL_USER', 'emmanuel.rdrlp@gmail.com')
-GMAIL_APP_PASSWORD = os.getenv('GMAIL_APP_PASSWORD', '')
+RESEND_API_KEY = os.getenv('RESEND_API_KEY', '')
 DASHBOARD_PORT = int(os.getenv('DASHBOARD_PORT', 5050))
 NGROK_STATIC_DOMAIN = os.getenv('NGROK_STATIC_DOMAIN', '')
 RAILWAY_PUBLIC_DOMAIN = os.getenv('RAILWAY_PUBLIC_DOMAIN', '')
+
+resend.api_key = RESEND_API_KEY
 
 
 def _get_dashboard_url() -> str:
@@ -55,39 +43,25 @@ def _get_dashboard_url() -> str:
     return f"http://localhost:{DASHBOARD_PORT}"
 
 
-def _send(msg: MIMEMultipart) -> bool:
-    """Send email via Gmail SMTP (outbound only). Returns True on success."""
-    if not GMAIL_APP_PASSWORD:
-        print("[mailer] GMAIL_APP_PASSWORD not set — skipping email.")
+def _send(subject: str, html: str, attachments: list = None) -> bool:
+    """Send email via Resend API. Returns True on success."""
+    if not RESEND_API_KEY:
+        print("[mailer] RESEND_API_KEY not set — skipping email.")
         return False
-
-    # SECURITY: enforce self-only delivery — recipient must always be the owner
-    recipient = msg['To']
-    if recipient != GMAIL_USER:
-        print(f"[mailer] BLOCKED — attempted to send to {recipient}. Only self-delivery allowed.")
+    try:
+        params = {
+            "from": "HR Emma <onboarding@resend.dev>",
+            "to": [GMAIL_USER],
+            "subject": subject,
+            "html": html,
+        }
+        if attachments:
+            params["attachments"] = attachments
+        resend.Emails.send(params)
+        return True
+    except Exception as e:
+        print(f"[mailer] Resend failed: {e}")
         return False
-
-    # Try port 587 (STARTTLS) first — works on most cloud providers incl. Railway
-    # Fall back to port 465 (SSL) if 587 fails
-    for attempt, (port, use_ssl) in enumerate([(587, False), (465, True)]):
-        try:
-            if use_ssl:
-                ctx = ssl.create_default_context()
-                with smtplib.SMTP_SSL('smtp.gmail.com', port, context=ctx, timeout=30) as server:
-                    server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
-                    server.sendmail(GMAIL_USER, GMAIL_USER, msg.as_string())
-            else:
-                with smtplib.SMTP('smtp.gmail.com', port, timeout=30) as server:
-                    server.ehlo()
-                    server.starttls(context=ssl.create_default_context())
-                    server.ehlo()
-                    server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
-                    server.sendmail(GMAIL_USER, GMAIL_USER, msg.as_string())
-            print(f"[mailer] Sent via port {port}")
-            return True
-        except Exception as e:
-            print(f"[mailer] Port {port} failed: {e}")
-    return False
 
 
 def _score_badge(score: int) -> str:
@@ -163,24 +137,14 @@ def send_job_digest(jobs: list[dict]) -> bool:
     </body>
     </html>"""
 
-    msg = MIMEMultipart('alternative')
-    msg['Subject'] = subject
-    msg['From'] = GMAIL_USER
-    msg['To'] = GMAIL_USER
-    msg.attach(MIMEText(html, 'html'))
-
-    ok = _send(msg)
+    ok = _send(subject, html)
     if ok:
         print(f"[mailer] Digest sent: {len(jobs)} jobs")
     return ok
 
 
 def send_manual_package(job: dict, cv_path: str, cl_path: str, excel_path: str = None) -> bool:
-    """
-    Send tailored CV + cover letter to Emmanuel for a manual application.
-    cv_path: path to .docx CV file
-    cl_path: path to .docx cover letter file
-    """
+    """Send tailored CV + cover letter to Emmanuel for a manual application."""
     subject = f"📄 HR Emma — CV listo: {job['title']} @ {job['company']}"
 
     html = f"""
@@ -190,7 +154,6 @@ def send_manual_package(job: dict, cv_path: str, cl_path: str, excel_path: str =
       <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb);padding:24px;border-radius:12px;margin-bottom:24px">
         <h1 style="color:white;margin:0;font-size:20px">📄 CV & Cover Letter Listo</h1>
       </div>
-
       <div style="background:#f8fafc;border-left:4px solid #2563eb;padding:16px;border-radius:4px;margin-bottom:20px">
         <p style="margin:0;font-size:16px"><strong>{job['title']}</strong></p>
         <p style="margin:4px 0 0;color:#6b7280">{job['company']} · {job.get('location','')}</p>
@@ -198,38 +161,28 @@ def send_manual_package(job: dict, cv_path: str, cl_path: str, excel_path: str =
           <a href="{job.get('url','#')}" style="color:#2563eb">Ver oferta en LinkedIn →</a>
         </p>
       </div>
-
       <p>Adjunto encontrarás:</p>
       <ul>
         <li><strong>CV personalizado</strong> — adaptado a los keywords de esta posición</li>
         <li><strong>Cover letter personalizada</strong> — alineada al rol y empresa</li>
       </ul>
-
-      <p style="color:#6b7280;font-size:13px">
-        Score de fit: <strong>{job.get('score', 0)}/100</strong>
-      </p>
+      <p style="color:#6b7280;font-size:13px">Score de fit: <strong>{job.get('score', 0)}/100</strong></p>
     </body>
     </html>"""
 
-    msg = MIMEMultipart()
-    msg['Subject'] = subject
-    msg['From'] = GMAIL_USER
-    msg['To'] = GMAIL_USER
-    msg.attach(MIMEText(html, 'html'))
-
-    attachments = [(cv_path, 'CV'), (cl_path, 'CoverLetter')]
-    if excel_path:
-        attachments.append((excel_path, 'Seguimiento'))
-    for path, label in attachments:
+    # Build Resend attachments list
+    resend_attachments = []
+    for path, label in [(cv_path, 'CV'), (cl_path, 'CoverLetter')] + ([(excel_path, 'Seguimiento')] if excel_path else []):
         if path and os.path.exists(path):
             with open(path, 'rb') as f:
-                part = MIMEApplication(f.read(), Name=os.path.basename(path))
-                part['Content-Disposition'] = f'attachment; filename="{os.path.basename(path)}"'
-                msg.attach(part)
+                resend_attachments.append({
+                    "filename": os.path.basename(path),
+                    "content": list(f.read()),
+                })
         else:
             print(f"[mailer] {label} file not found: {path}")
 
-    ok = _send(msg)
+    ok = _send(subject, html, resend_attachments if resend_attachments else None)
     if ok:
         print(f"[mailer] Manual package sent for {job['title']} @ {job['company']}")
     return ok
@@ -237,10 +190,6 @@ def send_manual_package(job: dict, cv_path: str, cl_path: str, excel_path: str =
 
 def send_alert(message: str) -> bool:
     """Send a plain-text alert email (e.g., login failure)."""
-    msg = MIMEMultipart('alternative')
-    msg['Subject'] = '⚠️ HR Emma — Alerta del sistema'
-    msg['From'] = GMAIL_USER
-    msg['To'] = GMAIL_USER
     html = f"""
     <html><body style="font-family:Arial,sans-serif;padding:20px">
       <div style="background:#fef2f2;border-left:4px solid #ef4444;padding:16px;border-radius:4px">
@@ -248,16 +197,11 @@ def send_alert(message: str) -> bool:
         <p style="margin:8px 0 0">{message}</p>
       </div>
     </body></html>"""
-    msg.attach(MIMEText(html, 'html'))
-    return _send(msg)
+    return _send('⚠️ HR Emma — Alerta del sistema', html)
 
 
 def send_test() -> bool:
-    """Send a test email to verify Gmail configuration."""
-    msg = MIMEMultipart('alternative')
-    msg['Subject'] = '✅ HR Emma — Test de conexión OK'
-    msg['From'] = GMAIL_USER
-    msg['To'] = GMAIL_USER
+    """Send a test email to verify Resend configuration."""
     html = """
     <html><body style="font-family:Arial,sans-serif;padding:20px">
       <div style="background:#f0fdf4;border-left:4px solid #22c55e;padding:16px;border-radius:4px">
@@ -265,8 +209,7 @@ def send_test() -> bool:
         <p>El sistema de notificaciones por email funciona.</p>
       </div>
     </body></html>"""
-    msg.attach(MIMEText(html, 'html'))
-    ok = _send(msg)
+    ok = _send('✅ HR Emma — Test de conexión OK', html)
     print(f"[mailer] Test email: {'SENT' if ok else 'FAILED'}")
     return ok
 

@@ -160,9 +160,17 @@ def _safe_filename(text: str) -> str:
 def _docx_to_pdf(docx_path: str) -> str | None:
     """Convert a .docx to .pdf using LibreOffice. Returns pdf path or None on failure."""
     import shutil
-    lo = shutil.which('libreoffice') or shutil.which('soffice')
+    lo = (
+        shutil.which('libreoffice')
+        or shutil.which('soffice')
+        or '/usr/bin/libreoffice'
+        or '/usr/lib/libreoffice/program/soffice'
+    )
+    # Verify it actually exists
+    if not os.path.exists(lo):
+        lo = None
     if not lo:
-        print(f"[generator] LibreOffice not found in PATH — sending DOCX", flush=True)
+        print(f"[generator] LibreOffice not found — sending DOCX", flush=True)
         return None
     try:
         out_dir = os.path.dirname(docx_path)

@@ -92,6 +92,19 @@ def status():
     })
 
 
+@app.route('/admin/refilter', methods=['POST'])
+def refilter_pending():
+    """Re-apply location filter to all pending jobs, skip ineligible ones."""
+    from src.filter import _is_location_eligible
+    jobs = get_pending_jobs()
+    skipped = 0
+    for job in jobs:
+        if not _is_location_eligible(job.get('location', ''), job.get('description', '')):
+            update_status(job['id'], 'skipped')
+            skipped += 1
+    return jsonify({'ok': True, 'skipped': skipped, 'remaining': len(jobs) - skipped})
+
+
 @app.route('/admin/send-digest', methods=['POST'])
 def send_digest():
     """Manually trigger email digest for all pending jobs."""

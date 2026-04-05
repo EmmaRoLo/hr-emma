@@ -40,6 +40,9 @@
         <a href="{{ job.url }}" target="_blank" class="text-decoration-none fw-semibold">
           {{ job.title }}
         </a>
+        {% if job.url %}
+        <a href="{{ job.url }}" target="_blank" class="ms-1 small" style="color:#0a66c2" title="Ver en LinkedIn">🔗</a>
+        {% endif %}
       </td>
       <td>{{ job.company }}</td>
       <td class="text-muted small">{{ job.location }}</td>

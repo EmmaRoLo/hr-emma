@@ -66,7 +66,12 @@
     </div>
   </div>
   <div class="d-flex justify-content-between align-items-center mt-2 pt-2" style="border-top:1px solid #f3f4f6">
-    <a href="/job/{{ job.id }}" class="text-muted small text-decoration-none">Ver descripción completa →</a>
+    <div class="d-flex gap-3 align-items-center">
+      <a href="/job/{{ job.id }}" class="text-muted small text-decoration-none">Ver descripción completa →</a>
+      {% if job.url %}
+      <a href="{{ job.url }}" target="_blank" class="small text-decoration-none" style="color:#0a66c2">🔗 Ver en LinkedIn</a>
+      {% endif %}
+    </div>
     <span class="text-muted small">{{ job.found_at[:16] if job.found_at else '' }}</span>
   </div>
 </div>

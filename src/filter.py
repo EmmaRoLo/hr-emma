@@ -337,19 +337,16 @@ def _is_location_eligible(location: str, description: str) -> bool:
     if is_hybrid:
         return False
 
-    # Non-Austria: only allow if explicitly FULLY remote
-    is_fully_remote = any(k in combined for k in FULLY_REMOTE_KW)
-    if is_fully_remote:
-        return True
-
-    # Fallback: check basic remote keywords but require no location anchor
     has_non_austria_city = any(k in combined for k in NON_AUSTRIA_KW)
-    is_remote = any(k in combined for k in REMOTE_KW)
-    if is_remote and not has_non_austria_city:
-        return True
-    if is_remote and has_non_austria_city:
-        # Has a specific non-Austria city + remote → likely hybrid or misleading
+
+    # If job is anchored to a specific non-Austria city → exclude regardless of remote claims
+    if has_non_austria_city:
         return False
+
+    # No specific city anchor — allow if remote mentioned
+    is_remote = any(k in combined for k in REMOTE_KW) or any(k in combined for k in FULLY_REMOTE_KW)
+    if is_remote:
+        return True
 
     return False
 

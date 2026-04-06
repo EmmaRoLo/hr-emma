@@ -380,36 +380,19 @@ async def apply_to_job(job: dict) -> bool:
         try:
             await page.goto(url, wait_until='networkidle', timeout=30000)
 
-            # Dismiss cookie/consent banner before anything else
-            for cookie_sel in [
-                'button[action-type="ACCEPT"]',
-                'button.artdeco-global-alert-action:first-child',
-                'button[aria-label*="Accept" i]',
-            ]:
-                try:
-                    btn = await page.query_selector(cookie_sel)
-                    if btn and await btn.is_visible():
-                        await btn.click()
-                        print(f"[apply] Cookie banner dismissed", flush=True)
-                        await asyncio.sleep(1.5)
-                        break
-                except Exception:
-                    pass
-
-            # Wait for job content to render
+            # Wait for job Apply button specifically
             try:
                 await page.wait_for_selector(
-                    '.jobs-unified-top-card__content--two-pane, '
-                    '.job-details-jobs-unified-top-card__container, '
-                    '.jobs-s-apply-button, .jobs-apply-button, '
-                    'button[aria-label*="Apply" i]',
+                    'button[aria-label*="Apply" i], '
+                    '.jobs-apply-button, '
+                    '.jobs-s-apply-button',
                     timeout=15000
                 )
+                print(f"[apply] Apply button detected by wait_for_selector", flush=True)
             except Exception:
-                pass  # Continue anyway — different layout possible
+                print(f"[apply] wait_for_selector timed out — continuing anyway", flush=True)
 
-            await page.evaluate("window.scrollBy(0, 300)")
-            await _random_delay(1.5, 2.5)
+            await _random_delay(2.0, 3.0)
 
             current_url = page.url
             page_title = await page.title()

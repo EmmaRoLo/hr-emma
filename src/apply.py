@@ -24,6 +24,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from src.database import update_status
 
 COOKIES_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'cookies', 'linkedin_cookies.json')
+
+LINKEDIN_EMAIL = os.getenv('LINKEDIN_EMAIL', '')
+LINKEDIN_PASSWORD = os.getenv('LINKEDIN_PASSWORD', '')
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), '..', 'output')
 
 # Emmanuel's pre-fill data
@@ -63,6 +66,46 @@ async def _load_cookies(context: BrowserContext) -> bool:
             c['domain'] = '.linkedin.com'
     await context.add_cookies(cookies)
     return True
+
+
+async def _linkedin_login(page: Page) -> bool:
+    """Attempt LinkedIn login with credentials from env vars. Returns True if successful."""
+    if not LINKEDIN_EMAIL or not LINKEDIN_PASSWORD:
+        print(f"[apply] No LinkedIn credentials in env — cannot login", flush=True)
+        return False
+    try:
+        print(f"[apply] Attempting LinkedIn login as {LINKEDIN_EMAIL}", flush=True)
+        await page.goto('https://www.linkedin.com/login', wait_until='domcontentloaded', timeout=20000)
+        await _random_delay(1.5, 2.5)
+
+        # Fill email
+        await page.fill('#username', LINKEDIN_EMAIL)
+        await _random_delay(0.5, 1.0)
+
+        # Fill password
+        await page.fill('#password', LINKEDIN_PASSWORD)
+        await _random_delay(0.5, 1.0)
+
+        # Click Sign in
+        await page.click('button[type="submit"]')
+        await _random_delay(3.0, 5.0)
+
+        current_url = page.url
+        if 'feed' in current_url or 'jobs' in current_url or 'mynetwork' in current_url:
+            print(f"[apply] Login successful!", flush=True)
+            return True
+        elif 'checkpoint' in current_url or 'challenge' in current_url:
+            print(f"[apply] Login blocked by checkpoint/2FA — cannot proceed", flush=True)
+            return False
+        elif 'login' in current_url:
+            print(f"[apply] Login failed — wrong credentials or blocked", flush=True)
+            return False
+        else:
+            print(f"[apply] Login result unknown — URL: {current_url[:60]}", flush=True)
+            return True  # Assume success if not on login page
+    except Exception as e:
+        print(f"[apply] Login error: {e}", flush=True)
+        return False
 
 
 async def _detect_captcha(page: Page) -> bool:
@@ -398,8 +441,22 @@ async def apply_to_job(job: dict) -> bool:
             page_title = await page.title()
             print(f"[apply] Landed: {current_url[:80]} | {page_title[:50]}", flush=True)
 
-            if 'login' in current_url or 'authwall' in current_url or 'checkpoint' in current_url:
-                print(f"[apply] Cookie expired — login redirect. Routing to manual.", flush=True)
+            if 'login' in current_url or 'authwall' in current_url or 'uas/login' in current_url:
+                print(f"[apply] Cookie expired — attempting login with credentials", flush=True)
+                logged_in = await _linkedin_login(page)
+                if not logged_in:
+                    print(f"[apply] Login failed — routing to manual", flush=True)
+                    update_status(job_id, 'manual')
+                    await browser.close()
+                    return False
+                # After login, navigate back to the job
+                await page.goto(url, wait_until='networkidle', timeout=30000)
+                await _random_delay(2.0, 3.0)
+                current_url = page.url
+                print(f"[apply] After login, landed: {current_url[:80]}", flush=True)
+
+            if 'checkpoint' in current_url:
+                print(f"[apply] LinkedIn checkpoint/2FA — routing to manual", flush=True)
                 update_status(job_id, 'manual')
                 await browser.close()
                 return False

@@ -51,6 +51,12 @@ Your task: produce a tailored CV as JSON. Rules:
 - Quantify every bullet — include %, dollar amounts, headcount, scale
 - Executive tone: action verbs, business impact, strategic framing
 - Do NOT add extra roles not in the master profile
+- WRITING STYLE — human, natural, senior executive tone:
+  * NO em dashes (— or –). Use a period or rewrite the sentence instead
+  * NO Oxford commas (no comma before "and" in a list)
+  * NO over-formal connectors like "Furthermore", "Moreover", "Additionally"
+  * Vary sentence structure — not every bullet should start the same way
+  * DO NOT mention visa, residency, work authorization or Austria eligibility anywhere in the CV content (it is already in the header)
 
 Return ONLY valid JSON, no markdown, no explanation:
 {
@@ -80,8 +86,13 @@ Your task: write a tailored cover letter. Rules:
 - Opening: strong hook referencing the specific role and company
 - Body: 2 most relevant achievements that directly match job requirements
 - Company fit: 1–2 sentences showing you researched this specific company
-- Always include the Austria work authorization sentence
 - Closing: confident, forward-looking
+- WRITING STYLE — human, natural, senior executive tone:
+  * NO em dashes (— or –). Use a period or rewrite the sentence instead
+  * NO Oxford commas (no comma before "and" in a list)
+  * NO over-formal connectors like "Furthermore", "Moreover", "Additionally"
+  * Vary sentence structure
+  * DO NOT mention visa, residency or work authorization (a dedicated paragraph is already appended after the letter body)
 
 Return ONLY valid JSON:
 {
@@ -89,6 +100,36 @@ Return ONLY valid JSON:
   "opening": "...",
   "body": "...",
   "company_fit": "...",
+  "closing": "...",
+  "sign_off": "Kind regards,\\nEmmanuel Rodríguez"
+}"""
+
+
+ML_SYSTEM_PROMPT = """You are writing a Letter of Motivation for Emmanuel Rodríguez applying to a senior FMCG role.
+
+A Motivation Letter is DIFFERENT from a Cover Letter:
+- Cover Letter: formal intro, key achievements, what you bring
+- Motivation Letter: WHY this role and company, personal drive, career direction, cultural fit
+
+Write 4 paragraphs, ~320 words total. Structure:
+1. Opening: Why THIS specific role at THIS company excites you — specific, not generic
+2. Why this field: Genuine professional drive for Consumer Insights / Analytics / Commercial Strategy
+3. Why this company + career narrative: How their mission or market position connects with Emmanuel's trajectory and makes this the natural next step
+4. Closing: Confident, forward-looking — include Austria residency naturally as a practical readiness note (one sentence, woven in, not a standalone announcement)
+
+Rules:
+- NEVER fabricate — draw only from Emmanuel's real background
+- Human, personal, genuine — not corporate boilerplate
+- NO em dashes (— or –). Use a period or rewrite the sentence
+- NO Oxford commas (no comma before "and" in a list)
+- NO over-formal connectors like "Furthermore", "Moreover", "Additionally"
+
+Return ONLY valid JSON:
+{
+  "salutation": "Dear [Name/Hiring Team],",
+  "opening": "...",
+  "motivation_field": "...",
+  "motivation_company": "...",
   "closing": "...",
   "sign_off": "Kind regards,\\nEmmanuel Rodríguez"
 }"""
@@ -148,6 +189,26 @@ Location: {job.get('location', '')}
 {job.get('description', '')[:3000]}"""
 
     raw = _call_claude(CL_SYSTEM_PROMPT, user_msg)
+    raw = re.sub(r'^```json\s*', '', raw.strip())
+    raw = re.sub(r'\s*```$', '', raw.strip())
+    return json.loads(raw)
+
+
+def _tailor_motivation_letter(job: dict) -> dict:
+    user_msg = f"""PROFILE SUMMARY:
+{SUMMARY}
+
+CONTACT:
+{PROFILE['name']} | {PROFILE['address']} | {PROFILE['phone']} | {PROFILE['email']}
+
+JOB DESCRIPTION:
+Title: {job['title']}
+Company: {job['company']}
+Location: {job.get('location', '')}
+
+{job.get('description', '')[:3000]}"""
+
+    raw = _call_claude(ML_SYSTEM_PROMPT, user_msg)
     raw = re.sub(r'^```json\s*', '', raw.strip())
     raw = re.sub(r'\s*```$', '', raw.strip())
     return json.loads(raw)
@@ -426,10 +487,73 @@ def _build_cl_docx(tailored: dict, job: dict) -> str:
     return path
 
 
-def generate_and_send(job: dict) -> tuple[str, str]:
+def _build_ml_docx(tailored: dict, job: dict) -> str:
+    doc = Document()
+
+    for section in doc.sections:
+        section.top_margin = Pt(54)
+        section.bottom_margin = Pt(54)
+        section.left_margin = Pt(72)
+        section.right_margin = Pt(72)
+
+    # Header
+    h = doc.add_heading(HEADER['name'], 0)
+    for run in h.runs:
+        run.font.color.rgb = RGBColor(30, 58, 95)
+
+    contact_p = doc.add_paragraph(
+        f"{HEADER['address']}\n{HEADER['email']}  ·  {HEADER['phone']}"
+    )
+    for run in contact_p.runs:
+        _set_font(run, size=10, color=(107, 114, 128))
+    contact_p.paragraph_format.space_after = Pt(16)
+
+    # Date
+    date_p = doc.add_paragraph(datetime.now().strftime('%B %d, %Y'))
+    for run in date_p.runs:
+        _set_font(run, size=11)
+    date_p.paragraph_format.space_after = Pt(12)
+
+    # Title
+    title_p = doc.add_paragraph('LETTER OF MOTIVATION')
+    for run in title_p.runs:
+        _set_font(run, size=12, bold=True, color=(30, 58, 95))
+    title_p.paragraph_format.space_after = Pt(12)
+
+    # Salutation
+    sal_p = doc.add_paragraph(tailored.get('salutation', 'Dear Hiring Team,'))
+    for run in sal_p.runs:
+        _set_font(run, size=11)
+    sal_p.paragraph_format.space_after = Pt(10)
+
+    # Body paragraphs
+    for para_key in ['opening', 'motivation_field', 'motivation_company', 'closing']:
+        text = tailored.get(para_key, '')
+        if text:
+            p = doc.add_paragraph(text)
+            for run in p.runs:
+                _set_font(run, size=11)
+            p.paragraph_format.space_after = Pt(10)
+
+    # Sign off
+    p = doc.add_paragraph(tailored.get('sign_off', 'Kind regards,\nEmmanuel Rodríguez'))
+    for run in p.runs:
+        _set_font(run, size=11, bold=True)
+
+    # Save
+    date_str = datetime.now().strftime('%Y%m%d')
+    fname = f"MotivationLetter_Emmanuel_{_safe_filename(job['company'])}_{date_str}.docx"
+    path = os.path.join(OUTPUT_DIR, fname)
+    doc.save(path)
+    print(f"[generator] Motivation letter saved: {path}")
+    return path
+
+
+def generate_and_send(job: dict) -> tuple[str, str, str]:
     """
-    Generate tailored CV + cover letter for a job, save as .docx, email to Emmanuel.
-    Returns (cv_path, cl_path).
+    Generate tailored CV + cover letter + motivation letter for a job.
+    Saves as PDF (falls back to docx), emails all 3 to Emmanuel.
+    Returns (cv_path, cl_path, ml_path).
     """
     print(f"[generator] Generating for: {job['title']} @ {job['company']}")
 
@@ -456,12 +580,27 @@ def generate_and_send(job: dict) -> tuple[str, str]:
             'sign_off': STRUCTURE['sign_off'],
         }
 
+    try:
+        tailored_ml = _tailor_motivation_letter(job)
+    except Exception as e:
+        print(f"[generator] Claude ML error: {e} — using fallback")
+        tailored_ml = {
+            'salutation': 'Dear Hiring Team,',
+            'opening': f"I am writing to express my strong motivation for the {job['title']} role at {job['company']}.",
+            'motivation_field': '',
+            'motivation_company': '',
+            'closing': 'I look forward to the opportunity to discuss how my background aligns with your goals. I am based in Austria with full eligibility to work locally.',
+            'sign_off': 'Kind regards,\nEmmanuel Rodríguez',
+        }
+
     cv_docx = _build_cv_docx(tailored_cv, job)
     cl_docx = _build_cl_docx(tailored_cl, job)
+    ml_docx = _build_ml_docx(tailored_ml, job)
 
     # Convert to PDF (keep docx as fallback)
     cv_path = _docx_to_pdf(cv_docx) or cv_docx
     cl_path = _docx_to_pdf(cl_docx) or cl_docx
+    ml_path = _docx_to_pdf(ml_docx) or ml_docx
 
     # Save PDF copy + update Excel tracker
     try:
@@ -469,9 +608,9 @@ def generate_and_send(job: dict) -> tuple[str, str]:
     except Exception as e:
         print(f"[generator] Tracker error (non-fatal): {e}")
 
-    # Send email with CV, cover letter, and Excel tracker attached
+    # Send email with CV, cover letter, motivation letter and Excel tracker attached
     excel = EXCEL_PATH if os.path.exists(EXCEL_PATH) else None
-    send_manual_package(job, cv_path, cl_path, excel_path=excel)
+    send_manual_package(job, cv_path, cl_path, ml_path=ml_path, excel_path=excel)
     update_status(job['id'], 'sent')
 
-    return cv_path, cl_path
+    return cv_path, cl_path, ml_path

@@ -446,8 +446,13 @@ async def apply_to_job(job: dict) -> bool:
                 'login' in current_url
                 or 'authwall' in current_url
                 or 'uas/login' in current_url
-                or await page.query_selector('button[type="submit"].btn-md, input#username, .contextual-sign-in-modal') is not None
             )
+            if not needs_login:
+                # Check DOM for login modal — use very specific selectors only
+                login_el = await page.query_selector('input#username, .contextual-sign-in-modal, form.login__form')
+                if login_el:
+                    print(f"[apply] Login modal detected in DOM", flush=True)
+                    needs_login = True
             if needs_login:
                 print(f"[apply] Login required (URL or modal) — attempting login", flush=True)
                 logged_in = await _linkedin_login(page)

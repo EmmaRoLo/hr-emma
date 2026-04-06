@@ -143,8 +143,8 @@ def send_job_digest(jobs: list[dict]) -> bool:
     return ok
 
 
-def send_manual_package(job: dict, cv_path: str, cl_path: str, excel_path: str = None) -> bool:
-    """Send tailored CV + cover letter to Emmanuel for a manual application."""
+def send_manual_package(job: dict, cv_path: str, cl_path: str, ml_path: str = None, excel_path: str = None) -> bool:
+    """Send tailored CV + cover letter + motivation letter to Emmanuel for a manual application."""
     subject = f"📄 HR Emma — CV listo: {job['title']} @ {job['company']}"
 
     html = f"""
@@ -152,7 +152,7 @@ def send_manual_package(job: dict, cv_path: str, cl_path: str, excel_path: str =
     <html>
     <body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
       <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb);padding:24px;border-radius:12px;margin-bottom:24px">
-        <h1 style="color:white;margin:0;font-size:20px">📄 CV & Cover Letter Listo</h1>
+        <h1 style="color:white;margin:0;font-size:20px">📄 CV, Cover Letter & Motivation Letter</h1>
       </div>
       <div style="background:#f8fafc;border-left:4px solid #2563eb;padding:16px;border-radius:4px;margin-bottom:20px">
         <p style="margin:0;font-size:16px"><strong>{job['title']}</strong></p>
@@ -164,15 +164,17 @@ def send_manual_package(job: dict, cv_path: str, cl_path: str, excel_path: str =
       <p>Adjunto encontrarás:</p>
       <ul>
         <li><strong>CV personalizado</strong> — adaptado a los keywords de esta posición</li>
-        <li><strong>Cover letter personalizada</strong> — alineada al rol y empresa</li>
+        <li><strong>Cover letter</strong> — logros clave alineados al rol y empresa</li>
+        <li><strong>Motivation letter</strong> — por qué este rol y empresa te motivan</li>
       </ul>
       <p style="color:#6b7280;font-size:13px">Score de fit: <strong>{job.get('score', 0)}/100</strong></p>
     </body>
     </html>"""
 
     # Build Resend attachments list
+    attachments_spec = [(cv_path, 'CV'), (cl_path, 'CoverLetter'), (ml_path, 'MotivationLetter')] + ([(excel_path, 'Seguimiento')] if excel_path else [])
     resend_attachments = []
-    for path, label in [(cv_path, 'CV'), (cl_path, 'CoverLetter')] + ([(excel_path, 'Seguimiento')] if excel_path else []):
+    for path, label in attachments_spec:
         if path and os.path.exists(path):
             with open(path, 'rb') as f:
                 resend_attachments.append({

@@ -11,15 +11,14 @@ PROFILE = {
     "phone": "+43 66021 64853",
     "email": "emmanuel.rdrlp@gmail.com",
     "linkedin": "https://www.linkedin.com/in/emmanuel-rdrlp/",
-    "work_authorization": "Legal resident in Austria — fully eligible to work in Austria/EU",
+    "work_authorization": "Legal resident in Austria. Fully eligible to work in Austria and the EU.",
 }
 
 SUMMARY = (
-    "Commercial & Insights Leader with 10+ years driving revenue growth, category strategy, "
+    "Commercial & Insights Leader with 10+ years driving revenue growth, category strategy "
     "and organizational transformation across FMCG / CPG in LATAM. Expert in consumer insights, "
-    "advanced analytics, and commercial excellence. Currently leading Business Transformation at "
-    "PepsiCo, designing operating models for scale. MBA candidate at TU Wien (Austria). "
-    "Legal resident — fully eligible to work in Austria/EU."
+    "advanced analytics and commercial excellence. Currently leading Business Transformation at "
+    "PepsiCo, designing operating models for scale. MBA candidate at TU Wien (Austria)."
 )
 
 CORE_COMPETENCIES = [

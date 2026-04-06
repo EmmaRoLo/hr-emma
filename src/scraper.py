@@ -273,14 +273,33 @@ def _parse_job_cards_html(html: str) -> list[dict]:
     return jobs
 
 
+_CLOSED_SIGNALS = [
+    'no longer accepting applications',
+    'ya no se aceptan solicitudes',
+    'bewerbungen werden nicht mehr',
+    'cette offre n\'accepte plus',
+    'closed for applications',
+    'application deadline has passed',
+]
+
+
 def _get_job_description_http(session: requests.Session, url: str) -> str:
-    """Fetch job description via HTTP request."""
+    """
+    Fetch job description via HTTP request.
+    Returns '__CLOSED__' sentinel if job is no longer accepting applications.
+    """
     try:
         time.sleep(random.uniform(2.0, 5.0))
         resp = session.get(url, timeout=15)
         if resp.status_code != 200:
             return ''
         soup = BeautifulSoup(resp.text, 'html.parser')
+
+        # Check for "no longer accepting applications" before parsing description
+        page_text_lower = soup.get_text(separator=' ').lower()
+        if any(sig in page_text_lower for sig in _CLOSED_SIGNALS):
+            return '__CLOSED__'
+
         for sel in ['.description__text', '.jobs-description__content', '#job-details', '.show-more-less-html__markup']:
             el = soup.select_one(sel)
             if el:
@@ -370,10 +389,16 @@ async def scrape_jobs(notify_login_error=None) -> list[dict]:
 
                 print(f"[scraper]   Page {page_num + 1}: {len(cards)} found, {len(fresh)} new")
 
+                open_jobs = []
                 for job in fresh:
-                    job['description'] = _get_job_description_http(session, job['url'])
+                    desc = _get_job_description_http(session, job['url'])
+                    if desc == '__CLOSED__':
+                        print(f"[scraper]   Closed (no longer accepting): {job['title']} @ {job['company']}")
+                        continue
+                    job['description'] = desc
+                    open_jobs.append(job)
 
-                all_jobs.extend(fresh)
+                all_jobs.extend(open_jobs)
 
                 if len(cards) < 20:
                     break

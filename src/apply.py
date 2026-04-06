@@ -448,11 +448,14 @@ async def apply_to_job(job: dict) -> bool:
                 or 'uas/login' in current_url
             )
             if not needs_login:
-                # Check DOM for login modal — use very specific selectors only
-                login_el = await page.query_selector('input#username, .contextual-sign-in-modal, form.login__form')
-                if login_el:
-                    print(f"[apply] Login modal detected in DOM", flush=True)
-                    needs_login = True
+                # Check DOM for login modal — must be VISIBLE (LinkedIn SPA loads login form
+                # in background even on authenticated pages, so hidden elements are false positives)
+                for login_sel in ['input#username', '.contextual-sign-in-modal', 'form.login__form']:
+                    login_el = await page.query_selector(login_sel)
+                    if login_el and await login_el.is_visible():
+                        print(f"[apply] Login modal visible in DOM ({login_sel})", flush=True)
+                        needs_login = True
+                        break
             if needs_login:
                 print(f"[apply] Login required (URL or modal) — attempting login", flush=True)
                 logged_in = await _linkedin_login(page)

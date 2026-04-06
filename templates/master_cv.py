@@ -162,6 +162,7 @@ EDUCATION = [
 LANGUAGES = [
     {"language": "Spanish", "level": "Native"},
     {"language": "English", "level": "Advanced (C1)"},
+    {"language": "German", "level": "Basic (A1)"},
 ]
 
 SOFTWARE = [

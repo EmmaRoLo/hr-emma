@@ -441,8 +441,15 @@ async def apply_to_job(job: dict) -> bool:
             page_title = await page.title()
             print(f"[apply] Landed: {current_url[:80]} | {page_title[:50]}", flush=True)
 
-            if 'login' in current_url or 'authwall' in current_url or 'uas/login' in current_url:
-                print(f"[apply] Cookie expired — attempting login with credentials", flush=True)
+            # Detect login redirect OR login modal overlay
+            needs_login = (
+                'login' in current_url
+                or 'authwall' in current_url
+                or 'uas/login' in current_url
+                or await page.query_selector('button[type="submit"].btn-md, input#username, .contextual-sign-in-modal') is not None
+            )
+            if needs_login:
+                print(f"[apply] Login required (URL or modal) — attempting login", flush=True)
                 logged_in = await _linkedin_login(page)
                 if not logged_in:
                     print(f"[apply] Login failed — routing to manual", flush=True)
@@ -455,7 +462,7 @@ async def apply_to_job(job: dict) -> bool:
                 current_url = page.url
                 print(f"[apply] After login, landed: {current_url[:80]}", flush=True)
 
-            if 'checkpoint' in current_url:
+            if 'checkpoint' in current_url or 'challenge' in current_url:
                 print(f"[apply] LinkedIn checkpoint/2FA — routing to manual", flush=True)
                 update_status(job_id, 'manual')
                 await browser.close()

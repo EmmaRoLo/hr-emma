@@ -450,12 +450,25 @@ async def apply_to_job(job: dict) -> bool:
             if not needs_login:
                 # Check DOM for login modal — must be VISIBLE (LinkedIn SPA loads login form
                 # in background even on authenticated pages, so hidden elements are false positives)
-                for login_sel in ['input#username', '.contextual-sign-in-modal', 'form.login__form']:
+                for login_sel in ['input#username', 'form.login__form']:
                     login_el = await page.query_selector(login_sel)
                     if login_el and await login_el.is_visible():
-                        print(f"[apply] Login modal visible in DOM ({login_sel})", flush=True)
+                        print(f"[apply] Login form visible in DOM ({login_sel})", flush=True)
                         needs_login = True
                         break
+
+            if not needs_login:
+                # Detect contextual sign-in modal overlay — modal__dismiss only exists when a
+                # modal is open; pair with sign-in content to confirm it's the login modal
+                modal_dismiss = await page.query_selector('button.modal__dismiss')
+                if modal_dismiss and await modal_dismiss.is_visible():
+                    sign_in_content = await page.query_selector(
+                        '[class*="contextual-sign-in-modal"], [class*="sign-in-modal"], '
+                        'button.btn-primary[class*="btn-md"]'
+                    )
+                    if sign_in_content:
+                        print(f"[apply] Contextual sign-in modal overlay detected", flush=True)
+                        needs_login = True
             if needs_login:
                 print(f"[apply] Login required (URL or modal) — attempting login", flush=True)
                 logged_in = await _linkedin_login(page)

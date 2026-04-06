@@ -25,14 +25,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from src.database import update_status
 from src.mailer import send_manual_package
 from src.tracker import record_sent_cv, EXCEL_PATH
-from templates.master_cover_letter import HEADER, SHORT_VERSION, STRUCTURE, AREA_KEYWORDS
+from templates.master_cover_letter import HEADER, STRUCTURE
 from templates.master_cv import (
     CORE_COMPETENCIES, EDUCATION, EXPERIENCE, LANGUAGES, PROFILE,
     SOFTWARE, SUMMARY,
 )
 
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), '..', 'output')
-PHOTO_PATH = os.path.join(os.path.dirname(__file__), '..', 'Originales', 'Foto Emma Profesional.png')
+PHOTO_PATH = os.path.join(os.path.dirname(__file__), '..', 'Originales', 'Foto Emmma V2.jpg')
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY', ''))

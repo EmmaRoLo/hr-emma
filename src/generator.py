@@ -46,7 +46,8 @@ You receive:
 Your task: produce a tailored CV as JSON. Rules:
 - NEVER fabricate experience or facts — only rearrange and re-emphasize what exists
 - Rewrite the summary (max 3 sentences) mirroring the job's exact keywords
-- Select the 4–6 most relevant experience bullet points per role (from master bullets list)
+- ALWAYS include ALL roles from the master profile — never drop any position
+- For each role, select the 3–5 most relevant bullet points (from master bullets list)
 - Reorder core_competencies to put the most relevant ones first (max 12)
 - Quantify every bullet — include %, dollar amounts, headcount, scale
 - Executive tone: action verbs, business impact, strategic framing
@@ -344,9 +345,16 @@ def _build_cv_docx(tailored: dict, job: dict) -> str:
 
     doc.add_paragraph('').paragraph_format.space_after = Pt(4)
 
+    # Experience — guarantee all master roles appear even if Claude dropped some
+    tailored_exp = tailored.get('experience', [])
+    tailored_titles = {e.get('title', '').lower() for e in tailored_exp}
+    for master_role in EXPERIENCE:
+        if master_role['title'].lower() not in tailored_titles:
+            tailored_exp.append(master_role)
+
     # Experience
     _add_section_header(doc, 'PROFESSIONAL EXPERIENCE')
-    for exp in tailored.get('experience', EXPERIENCE):
+    for exp in tailored_exp:
         # Role title + company
         p = doc.add_paragraph()
         p.paragraph_format.space_before = Pt(6)

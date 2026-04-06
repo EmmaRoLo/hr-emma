@@ -378,23 +378,38 @@ async def apply_to_job(job: dict) -> bool:
         page = await context.new_page()
 
         try:
-            await page.goto(url, wait_until='domcontentloaded', timeout=25000)
+            await page.goto(url, wait_until='networkidle', timeout=30000)
 
-            # Wait for LinkedIn job page to fully render (Apply button loads via JS)
+            # Dismiss cookie/consent banner before anything else
+            for cookie_sel in [
+                'button[action-type="ACCEPT"]',
+                'button.artdeco-global-alert-action:first-child',
+                'button[aria-label*="Accept" i]',
+            ]:
+                try:
+                    btn = await page.query_selector(cookie_sel)
+                    if btn and await btn.is_visible():
+                        await btn.click()
+                        print(f"[apply] Cookie banner dismissed", flush=True)
+                        await asyncio.sleep(1.5)
+                        break
+                except Exception:
+                    pass
+
+            # Wait for job content to render
             try:
                 await page.wait_for_selector(
-                    '.jobs-unified-top-card, .job-details-jobs-unified-top-card__job-title, '
-                    '.jobs-details__main-content, .jobs-apply-button, '
+                    '.jobs-unified-top-card__content--two-pane, '
+                    '.job-details-jobs-unified-top-card__container, '
+                    '.jobs-s-apply-button, .jobs-apply-button, '
                     'button[aria-label*="Apply" i]',
-                    timeout=12000
+                    timeout=15000
                 )
             except Exception:
-                pass  # Continue anyway
-            # Scroll down to trigger lazy-loaded content
-            await page.evaluate("window.scrollBy(0, 400)")
-            await _random_delay(2.0, 3.0)
-            await page.evaluate("window.scrollBy(0, -200)")
-            await _random_delay(1.0, 2.0)
+                pass  # Continue anyway — different layout possible
+
+            await page.evaluate("window.scrollBy(0, 300)")
+            await _random_delay(1.5, 2.5)
 
             current_url = page.url
             page_title = await page.title()
@@ -412,6 +427,20 @@ async def apply_to_job(job: dict) -> bool:
                 await browser.close()
                 return False
 
+            # Find job container to scope button searches
+            job_container = None
+            for container_sel in [
+                '.jobs-unified-top-card',
+                '.job-details-jobs-unified-top-card__container',
+                '.jobs-details__main-content',
+                '.scaffold-layout__main',
+            ]:
+                job_container = await page.query_selector(container_sel)
+                if job_container:
+                    break
+            search_root = job_container if job_container else page
+            print(f"[apply] Job container: {'found' if job_container else 'not found — using page'}", flush=True)
+
             # ── Try Easy Apply ────────────────────────────────────────────
             easy_apply_btn = None
             for selector in [
@@ -420,7 +449,7 @@ async def apply_to_job(job: dict) -> bool:
                 '.jobs-apply-button',
                 'button:has-text("Easy Apply")',
             ]:
-                easy_apply_btn = await page.query_selector(selector)
+                easy_apply_btn = await search_root.query_selector(selector)
                 if easy_apply_btn and await easy_apply_btn.is_visible():
                     break
                 easy_apply_btn = None
@@ -494,10 +523,12 @@ async def apply_to_job(job: dict) -> bool:
             # ── No Easy Apply → try external Apply button ─────────────────
             print(f"[apply] No Easy Apply found — looking for external Apply button", flush=True)
 
-            # Log all buttons to diagnose selector issue
+            # Log buttons from job container for diagnosis
             try:
-                all_btns = await page.query_selector_all('button')
-                for b in all_btns[:15]:
+                log_root = job_container if job_container else page
+                all_btns = await log_root.query_selector_all('button')
+                print(f"[apply] Buttons in job container: {len(all_btns)}", flush=True)
+                for b in all_btns[:30]:
                     try:
                         lbl = await b.get_attribute('aria-label') or ''
                         cls = await b.get_attribute('class') or ''
@@ -511,10 +542,8 @@ async def apply_to_job(job: dict) -> bool:
             external_url = None
 
             for selector in [
-                # LinkedIn logged-in: aria-label contains "Apply to" + "company website"
                 'button[aria-label*="company website" i]',
                 'a[aria-label*="company website" i]',
-                # Broader Apply selectors
                 'button.jobs-apply-button',
                 'a.jobs-apply-button',
                 '.jobs-apply-button',
@@ -527,7 +556,7 @@ async def apply_to_job(job: dict) -> bool:
                 'a:has-text("Apply")',
                 'button:has-text("Apply")',
             ]:
-                btn = await page.query_selector(selector)
+                btn = await search_root.query_selector(selector)
                 if btn:
                     href = await btn.get_attribute('href')
                     if href and href.startswith('http'):

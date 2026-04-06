@@ -29,8 +29,8 @@ def reset_apply_counter():
 
 
 def run_pipeline():
-    """Main hourly pipeline: scrape → filter → save → notify."""
-    print('\n[pipeline] --- Starting hourly run ---')
+    """Pipeline: scrape → filter → save → notify. Runs at 7am and 12pm MX time."""
+    print('\n[pipeline] --- Starting pipeline run ---')
 
     # 1. Scrape
     raw_jobs = asyncio.run(scrape_jobs(notify_login_error=send_alert))
@@ -74,19 +74,32 @@ def run_pipeline():
 
 
 def create_scheduler() -> BackgroundScheduler:
-    scheduler = BackgroundScheduler()
+    # Railway runs in UTC. Mexico City = UTC-6 (no DST since 2023).
+    # 7am MX  = 13:00 UTC
+    # 12pm MX = 18:00 UTC
+    scheduler = BackgroundScheduler(timezone='UTC')
 
-    # Main pipeline: every hour
     scheduler.add_job(
         run_pipeline,
-        trigger='interval',
-        hours=1,
-        id='linkedin_pipeline',
+        trigger='cron',
+        hour=13,
+        minute=0,
+        id='pipeline_morning',   # 7am MX
         max_instances=1,
         coalesce=True,
     )
 
-    # Reset auto-apply counter at midnight
+    scheduler.add_job(
+        run_pipeline,
+        trigger='cron',
+        hour=18,
+        minute=0,
+        id='pipeline_midday',    # 12pm MX
+        max_instances=1,
+        coalesce=True,
+    )
+
+    # Reset auto-apply counter at midnight UTC
     scheduler.add_job(
         reset_apply_counter,
         trigger='cron',

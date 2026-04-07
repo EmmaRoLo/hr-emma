@@ -124,10 +124,13 @@ ZONE_4_EXCLUDED = [
     'drug discovery', 'oncology', 'genomics', 'biopharma', 'medtronic',
     'novartis', 'roche', 'pfizer', 'astrazeneca', 'sanofi', 'bayer', 'boehringer',
     'merck', 'abbvie', 'gilead', 'biogen',
-    # Energy / Utilities / Oil & Gas
-    'energy', 'utilities', 'electricity', 'power generation', 'oil', 'gas',
-    'petroleum', 'renewables', 'solar', 'wind energy', 'nuclear',
-    'shell', 'bp ', 'exxon', 'total energies', 'engie', 'verbund',
+    # Energy / Utilities / Oil & Gas (specific companies only — generic 'energy' excluded to avoid
+    # false positives like "Siemens Energy" for strategy/innovation roles)
+    'utilities', 'power generation', 'oil & gas', 'petroleum',
+    'wind farm', 'solar farm', 'nuclear power', 'power plant',
+    'oil refinery', 'lng ', 'liquefied natural gas',
+    'shell plc', 'bp plc', 'exxon', 'total energies', 'engie', 'verbund',
+    'equinor', 'chevron', 'conocophillips', 'schlumberger', 'halliburton',
     # Mining / Raw Materials
     'mining', 'minerals', 'metals', 'steel', 'aluminum', 'iron ore',
     # Civil / Structural Engineering
@@ -155,8 +158,9 @@ ZONE_TIER_MATRIX = {
 
 # ── TITLE / AREA / LOCATION / SENIORITY KEYWORDS ────────────────────────────
 
-TITLE_DIRECTOR_KW   = ['director', 'head of', 'vp ', 'vice president', 'chief', 'cmo', 'cco', 'cso']
-TITLE_SR_MANAGER_KW = ['senior manager', 'sr manager', 'sr. manager', 'lead manager']
+TITLE_DIRECTOR_KW   = ['director', 'head of', 'vp ', 'vice president', 'chief', 'cmo', 'cco', 'cso',
+                       'partner', 'global lead', 'regional lead', 'principal consultant']
+TITLE_SR_MANAGER_KW = ['senior manager', 'sr manager', 'sr. manager', 'lead manager', 'senior lead']
 TITLE_MANAGER_KW    = ['manager', 'lead', 'principal']
 
 # Tier 1 — Core expertise: Strategy, Market Insights, Consumer Insights, Analytics, Shopper
@@ -181,10 +185,17 @@ AREA_TIER2 = [
     'commercial strategy', 'commercial excellence', 'commercial director',
     'commercial insights', 'commercial analytics', 'commercial lead',
     'commercial transformation', 'commercial operations', 'commercial manager',
-    # Transformation
+    # Business Development
+    'business development director', 'business development manager',
+    'regional business development', 'after sales business development',
+    'head of business development', 'business development lead',
+    'sales business development', 'strategic business development',
+    # Transformation / Innovation
     'business transformation', 'transformation director', 'transformation lead',
     'transformation program', 'operating model', 'capability building',
     'organisational transformation', 'organizational transformation',
+    'operational innovation', 'innovation partner', 'innovation director',
+    'innovation lead', 'process innovation', 'continuous improvement',
 ]
 
 # Tier 3 — Acceptable: Operations, Marketing, Trade

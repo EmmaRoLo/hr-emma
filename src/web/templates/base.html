@@ -34,9 +34,14 @@
   <nav class="navbar navbar-dark" style="background:linear-gradient(135deg,#1e3a5f,#2563eb)">
     <div class="container">
       <a class="navbar-brand" href="/">🎯 HR Emma</a>
-      <div class="d-flex gap-3">
+      <div class="d-flex gap-3 align-items-center">
         <a href="/" class="nav-link text-white {% if page=='pending' %}fw-bold{% endif %}">Pendientes</a>
         <a href="/history" class="nav-link text-white {% if page=='history' %}fw-bold{% endif %}">Historial</a>
+        <button onclick="adminAction('/admin/rescore','Re-puntuar jobs skipped con nuevo filtro...')"
+                class="btn btn-sm" style="background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.3)"
+                title="Recupera jobs excluidos por error con el filtro anterior">
+          🔄 Re-puntuar
+        </button>
         <a href="/status" class="nav-link text-white opacity-75" target="_blank">API</a>
       </div>
     </div>
@@ -70,6 +75,23 @@
         }
       })
       .catch(e => { btns.forEach(b => b.disabled = false); alert('Error: ' + e); });
+    }
+
+    function adminAction(endpoint, loadingMsg) {
+      if (loadingMsg) showToast(loadingMsg);
+      fetch(endpoint, {method:'POST'})
+        .then(r => r.json())
+        .then(data => {
+          if (data.recovered !== undefined) {
+            showToast(`✅ ${data.recovered} jobs recuperados de ${data.total_skipped} skipped`);
+            if (data.recovered > 0) setTimeout(() => location.reload(), 1500);
+          } else if (data.skipped !== undefined) {
+            showToast(`✅ ${data.skipped} jobs re-filtrados`);
+          } else {
+            showToast(data.message || 'Listo');
+          }
+        })
+        .catch(e => showToast('Error: ' + e));
     }
 
     function showToast(msg) {

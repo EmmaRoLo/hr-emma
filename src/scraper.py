@@ -37,34 +37,45 @@ TIME_FILTER_NORMAL    = "r86400"    # past 24h   — used on every subsequent ho
 
 SEARCH_CONFIGS = [
 
-    # ── AUSTRIA ───────────────────────────────────────────────────────────
+    # ── AUSTRIA: BROAD SWEEPS (net amplia — captura cualquier Director/Head/Partner/Manager)
+    # Estos son los más importantes: no dependen del área específica
+    {"keywords": "Director",                            "location": "Austria", "remote": False},
+    {"keywords": "Head of",                             "location": "Austria", "remote": False},
+    {"keywords": "Senior Manager",                      "location": "Austria", "remote": False},
+    {"keywords": "Partner strategy innovation",         "location": "Austria", "remote": False},
+    {"keywords": "Senior Director",                     "location": "Austria", "remote": False},
+
+    # ── AUSTRIA: POR ÁREA ────────────────────────────────────────────────
     {"keywords": "Consumer Insights Director",          "location": "Austria", "remote": False},
     {"keywords": "Analytics Director",                  "location": "Austria", "remote": False},
-    {"keywords": "Commercial Insights Manager",         "location": "Austria", "remote": False},
-    {"keywords": "Marketing Director",                  "location": "Austria", "remote": False},
-    {"keywords": "Commercial Strategy Director",        "location": "Austria", "remote": False},
-    {"keywords": "Business Transformation Director",    "location": "Austria", "remote": False},
-    {"keywords": "Head of Commercial",                  "location": "Austria", "remote": False},
+    {"keywords": "Commercial Strategy",                 "location": "Austria", "remote": False},
+    {"keywords": "Business Transformation",             "location": "Austria", "remote": False},
     {"keywords": "Category Management Director",        "location": "Austria", "remote": False},
+    {"keywords": "Business Development Manager",        "location": "Austria", "remote": False},
+    {"keywords": "Operational Excellence",              "location": "Austria", "remote": False},
+    {"keywords": "Innovation Partner",                  "location": "Austria", "remote": False},
 
-    # ── EUROPE ────────────────────────────────────────────────────────────
+    # ── EUROPE REMOTE: BROAD SWEEPS ──────────────────────────────────────
+    {"keywords": "Director Consumer Insights",          "location": "Europe",  "remote": True},
+    {"keywords": "Director Analytics",                  "location": "Europe",  "remote": True},
+    {"keywords": "Head of Strategy",                    "location": "Europe",  "remote": True},
+    {"keywords": "Head of Insights",                    "location": "Europe",  "remote": True},
+    {"keywords": "Head of Commercial",                  "location": "Europe",  "remote": True},
+    {"keywords": "Director Strategy FMCG",              "location": "Europe",  "remote": True},
+    {"keywords": "Senior Director Insights",            "location": "Europe",  "remote": True},
+
+    # ── EUROPE: POR ÁREA ────────────────────────────────────────────────
     {"keywords": "Head of Consumer Insights",           "location": "Europe",  "remote": False},
-    {"keywords": "Director Analytics Insights",         "location": "Europe",  "remote": False},
-    {"keywords": "Senior Manager Market Insights",      "location": "Europe",  "remote": False},
     {"keywords": "Director Marketing Analytics",        "location": "Europe",  "remote": False},
-    {"keywords": "Commercial Strategy Director",        "location": "Europe",  "remote": False},
     {"keywords": "Head of Commercial Strategy FMCG",   "location": "Europe",  "remote": False},
     {"keywords": "Commercial Director FMCG",            "location": "Europe",  "remote": False},
     {"keywords": "Business Transformation Director",    "location": "Europe",  "remote": False},
-    {"keywords": "Strategy Director FMCG",              "location": "Europe",  "remote": False},
-    {"keywords": "Head of Strategy Commercial",         "location": "Europe",  "remote": False},
     {"keywords": "Shopper Insights Director",           "location": "Europe",  "remote": False},
-    {"keywords": "Category Analytics Director",         "location": "Europe",  "remote": False},
     {"keywords": "Consumer Insights Manager",           "location": "Europe",  "remote": False},
-    {"keywords": "Senior Manager Commercial",           "location": "Europe",  "remote": False},
-    {"keywords": "Director of Strategy",                "location": "Europe",  "remote": False},
-
-    # Shopper & Category
+    {"keywords": "Business Development Manager",        "location": "Europe",  "remote": True},
+    {"keywords": "Operational Innovation",              "location": "Europe",  "remote": True},
+    {"keywords": "Business Transformation Partner",     "location": "Europe",  "remote": True},
+    {"keywords": "Innovation Director",                 "location": "Europe",  "remote": True},
     {"keywords": "Shopper Insights Director Manager",   "location": "Europe",  "remote": True},
     {"keywords": "Category Analytics Director",         "location": "Europe",  "remote": True},
 ]

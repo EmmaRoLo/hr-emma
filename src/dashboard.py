@@ -98,6 +98,38 @@ def status():
     })
 
 
+@app.route('/admin/add-job', methods=['POST'])
+def add_job_manual():
+    """Manually insert a job into the DB. Protected by DASHBOARD_SECRET."""
+    secret = os.getenv('DASHBOARD_SECRET', '')
+    data = request.get_json(force=True)
+    if data.get('secret') != secret:
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 403
+
+    from src.filter import score_job, ZONE_LABELS
+    from src.database import save_jobs
+    from datetime import datetime
+
+    job = {
+        'id':          data.get('id') or f"manual_{int(datetime.utcnow().timestamp())}",
+        'title':       data.get('title', ''),
+        'company':     data.get('company', ''),
+        'location':    data.get('location', ''),
+        'description': data.get('description', ''),
+        'url':         data.get('url', ''),
+        'found_at':    datetime.utcnow().isoformat(),
+    }
+    if not job['title'] or not job['company']:
+        return jsonify({'ok': False, 'error': 'title and company required'}), 400
+
+    score, lang, zone, tier, cl = score_job(job)
+    job.update({'score': score, 'language': lang, 'zone': zone,
+                'zone_label': ZONE_LABELS.get(zone, ''), 'tier': tier,
+                'class_label': cl, 'status': 'pending'})
+    inserted = save_jobs([job])
+    return jsonify({'ok': True, 'inserted': inserted, 'score': score, 'class_label': cl, 'id': job['id']})
+
+
 @app.route('/admin/reset-all', methods=['POST'])
 def reset_all_to_pending():
     """Reset all non-pending jobs back to pending so they can be re-actioned."""
@@ -109,6 +141,31 @@ def reset_all_to_pending():
         count = result.rowcount
         conn.commit()
     return jsonify({'ok': True, 'reset': count})
+
+
+@app.route('/admin/rescore', methods=['POST'])
+def rescore_all():
+    """Re-score all skipped jobs with current filter logic. Recovers false-positives."""
+    from src.filter import score_job, ZONE_LABELS
+    from src.database import _connect
+    recovered = 0
+    with _connect() as conn:
+        rows = conn.execute(
+            "SELECT id, title, company, location, description FROM jobs WHERE status = 'skipped'"
+        ).fetchall()
+        for row in rows:
+            job = dict(row)
+            job['description'] = job.get('description') or ''
+            score, language, zone, tier, class_label = score_job(job)
+            if language != 'excluded' and score >= 40:
+                conn.execute(
+                    """UPDATE jobs SET status='pending', score=?, language=?, zone=?, zone_label=?, tier=?, class_label=?
+                       WHERE id=?""",
+                    (score, language, zone, ZONE_LABELS.get(zone, ''), tier, class_label, job['id'])
+                )
+                recovered += 1
+        conn.commit()
+    return jsonify({'ok': True, 'recovered': recovered, 'total_skipped': len(rows)})
 
 
 @app.route('/admin/refilter', methods=['POST'])

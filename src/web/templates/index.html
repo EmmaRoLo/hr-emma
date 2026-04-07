@@ -39,6 +39,18 @@
             <span class="class-badge" style="background:#ffedd5;color:#9a3412">{{ cl }}</span>
           {% endif %}
         {% endif %}
+        {% if job.zone_label %}
+          {% if job.zone == 1 %}
+            <span class="class-badge" style="background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0" title="Zone {{ job.zone }}">🏭 {{ job.zone_label }}</span>
+          {% elif job.zone == 2 %}
+            <span class="class-badge" style="background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd" title="Zone {{ job.zone }}">🔷 {{ job.zone_label }}</span>
+          {% elif job.zone == 3 %}
+            <span class="class-badge" style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa" title="Zone {{ job.zone }}">⚠️ {{ job.zone_label }}</span>
+          {% endif %}
+        {% endif %}
+        {% if job.tier %}
+          <span class="class-badge" style="background:#f8fafc;color:#64748b;border:1px solid #e2e8f0" title="Tier de área">T{{ job.tier }}</span>
+        {% endif %}
         <a href="{{ job.url }}" target="_blank" class="fw-bold text-decoration-none fs-6 text-dark">
           {{ job.title }}
         </a>

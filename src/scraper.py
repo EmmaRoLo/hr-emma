@@ -66,6 +66,10 @@ SEARCH_CONFIGS = [
     {"keywords": "Finance Manager Director",            "location": "Austria", "remote": False},
     {"keywords": "Account Director Manager",            "location": "Austria", "remote": False},
     {"keywords": "Global Manager",                      "location": "Austria", "remote": False},
+    {"keywords": "Category Development Manager",        "location": "Austria", "remote": False},
+    {"keywords": "Category Manager",                    "location": "Austria", "remote": False},
+    {"keywords": "E-Commerce Manager Director",         "location": "Austria", "remote": False},
+    {"keywords": "International Manager",               "location": "Austria", "remote": False},
 
     # ══════════════════════════════════════════════════════════════════════
     # EUROPE REMOTE — BROAD SWEEPS

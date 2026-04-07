@@ -37,25 +37,39 @@ TIME_FILTER_NORMAL    = "r86400"    # past 24h   — used on every subsequent ho
 
 SEARCH_CONFIGS = [
 
-    # ── AUSTRIA: BROAD SWEEPS (net amplia — captura cualquier Director/Head/Partner/Manager)
-    # Estos son los más importantes: no dependen del área específica
-    {"keywords": "Director",                            "location": "Austria", "remote": False},
-    {"keywords": "Head of",                             "location": "Austria", "remote": False},
-    {"keywords": "Senior Manager",                      "location": "Austria", "remote": False},
-    {"keywords": "Partner strategy innovation",         "location": "Austria", "remote": False},
-    {"keywords": "Senior Director",                     "location": "Austria", "remote": False},
+    # ══════════════════════════════════════════════════════════════════════
+    # AUSTRIA — BROAD SWEEPS (5 pages each = 125 results)
+    # These are the most critical — catch ANY senior role regardless of area
+    # pages=5 overrides the default 3
+    # ══════════════════════════════════════════════════════════════════════
+    {"keywords": "Director",                            "location": "Austria", "remote": False, "pages": 5},
+    {"keywords": "Head of",                             "location": "Austria", "remote": False, "pages": 5},
+    {"keywords": "Senior Manager",                      "location": "Austria", "remote": False, "pages": 5},
+    {"keywords": "Senior Director",                     "location": "Austria", "remote": False, "pages": 5},
+    {"keywords": "Lead",                                "location": "Austria", "remote": False, "pages": 4},
+    {"keywords": "Partner",                             "location": "Austria", "remote": False, "pages": 3},
 
-    # ── AUSTRIA: POR ÁREA ────────────────────────────────────────────────
-    {"keywords": "Consumer Insights Director",          "location": "Austria", "remote": False},
-    {"keywords": "Analytics Director",                  "location": "Austria", "remote": False},
+    # ══════════════════════════════════════════════════════════════════════
+    # AUSTRIA — BY AREA (categories the broad sweeps may miss)
+    # ══════════════════════════════════════════════════════════════════════
+    {"keywords": "Consumer Insights",                   "location": "Austria", "remote": False},
+    {"keywords": "Analytics Manager Director",          "location": "Austria", "remote": False},
     {"keywords": "Commercial Strategy",                 "location": "Austria", "remote": False},
     {"keywords": "Business Transformation",             "location": "Austria", "remote": False},
-    {"keywords": "Category Management Director",        "location": "Austria", "remote": False},
     {"keywords": "Business Development Manager",        "location": "Austria", "remote": False},
     {"keywords": "Operational Excellence",              "location": "Austria", "remote": False},
-    {"keywords": "Innovation Partner",                  "location": "Austria", "remote": False},
+    {"keywords": "Innovation",                          "location": "Austria", "remote": False},
+    # Missing categories found in audit:
+    {"keywords": "Sales Manager Director",              "location": "Austria", "remote": False},
+    {"keywords": "Portfolio Manager",                   "location": "Austria", "remote": False},
+    {"keywords": "Sustainability Director Lead",        "location": "Austria", "remote": False},
+    {"keywords": "Finance Manager Director",            "location": "Austria", "remote": False},
+    {"keywords": "Account Director Manager",            "location": "Austria", "remote": False},
+    {"keywords": "Global Manager",                      "location": "Austria", "remote": False},
 
-    # ── EUROPE REMOTE: BROAD SWEEPS ──────────────────────────────────────
+    # ══════════════════════════════════════════════════════════════════════
+    # EUROPE REMOTE — BROAD SWEEPS
+    # ══════════════════════════════════════════════════════════════════════
     {"keywords": "Director Consumer Insights",          "location": "Europe",  "remote": True},
     {"keywords": "Director Analytics",                  "location": "Europe",  "remote": True},
     {"keywords": "Head of Strategy",                    "location": "Europe",  "remote": True},
@@ -64,7 +78,9 @@ SEARCH_CONFIGS = [
     {"keywords": "Director Strategy FMCG",              "location": "Europe",  "remote": True},
     {"keywords": "Senior Director Insights",            "location": "Europe",  "remote": True},
 
-    # ── EUROPE: POR ÁREA ────────────────────────────────────────────────
+    # ══════════════════════════════════════════════════════════════════════
+    # EUROPE — BY AREA
+    # ══════════════════════════════════════════════════════════════════════
     {"keywords": "Head of Consumer Insights",           "location": "Europe",  "remote": False},
     {"keywords": "Director Marketing Analytics",        "location": "Europe",  "remote": False},
     {"keywords": "Head of Commercial Strategy FMCG",   "location": "Europe",  "remote": False},
@@ -374,9 +390,10 @@ async def scrape_jobs(notify_login_error=None) -> list[dict]:
         location = config['location']
         remote = config['remote']
 
-        print(f"[scraper] '{keywords}' / {location} / remote={remote}")
+        max_pages = config.get('pages', 3)
+        print(f"[scraper] '{keywords}' / {location} / remote={remote} / pages={max_pages}")
 
-        for page_num in range(3):
+        for page_num in range(max_pages):
             start = page_num * 25
             url = _build_url(keywords, location, remote, time_filter, start)
 

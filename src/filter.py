@@ -196,6 +196,25 @@ AREA_TIER2 = [
     'organisational transformation', 'organizational transformation',
     'operational innovation', 'innovation partner', 'innovation director',
     'innovation lead', 'process innovation', 'continuous improvement',
+    # Sales (global/regional/strategic sales director-level)
+    'global sales manager', 'global sales director', 'regional sales director',
+    'sales director', 'head of sales', 'vp sales', 'chief sales',
+    'sales strategy', 'sales excellence', 'strategic sales',
+    # Portfolio / Product Management (senior)
+    'portfolio manager', 'portfolio director', 'head of portfolio',
+    'product portfolio', 'portfolio strategy',
+    # Sustainability / ESG (strategy-level)
+    'sustainability lead', 'sustainability director', 'head of sustainability',
+    'global sustainability', 'esg director', 'esg lead', 'esg strategy',
+    # Finance (strategic / commercial finance)
+    'strategic finance', 'finance director', 'head of finance',
+    'commercial finance', 'finance strategy', 'fp&a director',
+    'financial planning', 'expert manager', 'finance manager',
+    # Account Director (senior commercial role)
+    'account director', 'global account director', 'key account director',
+    'senior account manager', 'global account manager',
+    # Location / Incentives / Tax Strategy
+    'location services', 'global location', 'tax incentives director',
 ]
 
 # Tier 3 — Acceptable: Operations, Marketing, Trade

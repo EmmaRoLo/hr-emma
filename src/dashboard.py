@@ -127,7 +127,17 @@ def add_job_manual():
                 'zone_label': ZONE_LABELS.get(zone, ''), 'tier': tier,
                 'class_label': cl, 'status': 'pending'})
     inserted = save_jobs([job])
-    return jsonify({'ok': True, 'inserted': inserted, 'score': score, 'class_label': cl, 'id': job['id']})
+    if inserted == 0:
+        # Already exists — update url and status to pending
+        from src.database import _connect
+        with _connect() as conn:
+            conn.execute(
+                "UPDATE jobs SET url=?, status='pending', score=?, class_label=?, zone=?, zone_label=?, tier=? WHERE id=?",
+                (job['url'], score, cl, zone, ZONE_LABELS.get(zone,''), tier, job['id'])
+            )
+            conn.commit()
+    return jsonify({'ok': True, 'inserted': inserted, 'updated': 1 if inserted == 0 else 0,
+                    'score': score, 'class_label': cl, 'id': job['id']})
 
 
 @app.route('/admin/reset-all', methods=['POST'])

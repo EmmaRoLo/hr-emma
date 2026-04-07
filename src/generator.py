@@ -402,8 +402,7 @@ def _build_cv_docx(tailored: dict, job: dict) -> str:
     _set_font(run, size=10)
 
     # Save
-    date_str = datetime.now().strftime('%Y%m%d')
-    fname = f"CV_Emmanuel_{_safe_filename(job['company'])}_{date_str}.docx"
+    fname = "Emmanuel_Rodriguez_CV.docx"
     path = os.path.join(OUTPUT_DIR, fname)
     doc.save(path)
     print(f"[generator] CV saved: {path}")
@@ -420,7 +419,7 @@ def _add_section_header(doc, text: str):
     _set_font(run2, size=8, color=(209, 213, 219))
 
 
-def _build_letter_docx(tailored: dict, job: dict, para_keys: list[str],
+def _build_letter_docx(tailored: dict, _job: dict, para_keys: list[str],
                         title_label: str, fname_prefix: str,
                         auth_paragraph: bool = False) -> str:
     """Shared builder for Cover Letter and Motivation Letter. Enforces 1-page layout."""
@@ -495,8 +494,11 @@ def _build_letter_docx(tailored: dict, job: dict, para_keys: list[str],
     for run in sign_p.runs:
         _set_font(run, size=11, bold=True)
 
-    date_str = datetime.now().strftime('%Y%m%d')
-    fname = f"{fname_prefix}_Emmanuel_{_safe_filename(job['company'])}_{date_str}.docx"
+    fname_map = {
+        'COVER LETTER': 'Emmanuel_Rodriguez_Cover_Letter.docx',
+        'LETTER OF MOTIVATION': 'Emmanuel_Rodriguez_Motivation_Letter.docx',
+    }
+    fname = fname_map.get(title_label, f'Emmanuel_Rodriguez_{fname_prefix}.docx')
     path = os.path.join(OUTPUT_DIR, fname)
     doc.save(path)
     print(f"[generator] {title_label} saved: {path}")
@@ -570,10 +572,21 @@ def generate_and_send(job: dict) -> tuple[str, str, str]:
     cl_docx = _build_cl_docx(tailored_cl, job)
     ml_docx = _build_ml_docx(tailored_ml, job)
 
-    # Convert to PDF (keep docx as fallback)
-    cv_path = _docx_to_pdf(cv_docx) or cv_docx
-    cl_path = _docx_to_pdf(cl_docx) or cl_docx
-    ml_path = _docx_to_pdf(ml_docx) or ml_docx
+    # Convert ALL three to PDF — must all succeed or all fall back to DOCX
+    cv_pdf  = _docx_to_pdf(cv_docx)
+    cl_pdf  = _docx_to_pdf(cl_docx)
+    ml_pdf  = _docx_to_pdf(ml_docx)
+
+    if cv_pdf and cl_pdf and ml_pdf:
+        cv_path, cl_path, ml_path = cv_pdf, cl_pdf, ml_pdf
+        print("[generator] All 3 documents converted to PDF successfully.")
+    else:
+        # At least one failed — send whatever was produced, but log clearly
+        cv_path  = cv_pdf  or cv_docx
+        cl_path  = cl_pdf  or cl_docx
+        ml_path  = ml_pdf  or ml_docx
+        missing = [n for n, p in [('CV', cv_pdf), ('CL', cl_pdf), ('ML', ml_pdf)] if not p]
+        print(f"[generator] WARNING: PDF conversion failed for: {missing} — sending DOCX fallback for those.")
 
     # Save PDF copy + update Excel tracker
     try:

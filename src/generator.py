@@ -76,31 +76,33 @@ Return ONLY valid JSON, no markdown, no explanation:
 
 CL_SYSTEM_PROMPT = """You are an elite executive cover letter writer for senior FMCG roles.
 
+COVER LETTER PURPOSE: A professional pitch — WHAT YOU BRING to this role.
+Focus: your most relevant achievements, skills match, and concrete value-add.
+This is NOT about why you want the role — that goes in the Motivation Letter.
+
 You receive:
 1. Emmanuel's profile summary
 2. A job description
-3. Cover letter structure template
 
-Your task: write a tailored cover letter. Rules:
-- Max 4 short paragraphs, ~250 words total
+Your task: write a tailored cover letter. Hard rules:
+- STRICT 1-PAGE LIMIT: max 3 short paragraphs, 180–210 words total (body only, excluding salutation/sign-off)
+- Each paragraph max 3 sentences
+- Opening (1 paragraph): name the role, state your most relevant title/expertise and ONE headline achievement with a number
+- Body (1 paragraph): 2 specific accomplishments that directly mirror the job's key requirements — use metrics (%, scale, revenue)
+- Closing (1 paragraph): one sentence on fit + one forward-looking sentence
 - Mirror keywords from the job description naturally
-- Opening: strong hook referencing the specific role and company
-- Body: 2 most relevant achievements that directly match job requirements
-- Company fit: 1–2 sentences showing you researched this specific company
-- Closing: confident, forward-looking
-- WRITING STYLE — human, natural, senior executive tone:
-  * NO em dashes (— or –). Use a period or rewrite the sentence instead
-  * NO Oxford commas (no comma before "and" in a list)
-  * NO over-formal connectors like "Furthermore", "Moreover", "Additionally"
-  * Vary sentence structure
-  * DO NOT mention visa, residency or work authorization (a dedicated paragraph is already appended after the letter body)
+- NO generic opener ("I am writing to apply…") — start with impact
+- WRITING STYLE:
+  * NO em dashes (— or –). Use a period or rewrite instead
+  * NO Oxford commas
+  * NO over-formal connectors ("Furthermore", "Moreover", "Additionally")
+  * DO NOT mention visa, residency or work authorization (added separately)
 
 Return ONLY valid JSON:
 {
   "salutation": "Dear [Name/Hiring Team],",
   "opening": "...",
   "body": "...",
-  "company_fit": "...",
   "closing": "...",
   "sign_off": "Kind regards,\\nEmmanuel Rodríguez"
 }"""
@@ -108,29 +110,28 @@ Return ONLY valid JSON:
 
 ML_SYSTEM_PROMPT = """You are writing a Letter of Motivation for Emmanuel Rodríguez applying to a senior FMCG role.
 
-A Motivation Letter is DIFFERENT from a Cover Letter:
-- Cover Letter: formal intro, key achievements, what you bring
-- Motivation Letter: WHY this role and company, personal drive, career direction, cultural fit
+MOTIVATION LETTER PURPOSE: WHY you want this role and this company — personal drive, career story, cultural fit.
+This is NOT a list of achievements — that belongs in the Cover Letter.
 
-Write 4 paragraphs, ~320 words total. Structure:
-1. Opening: Why THIS specific role at THIS company excites you — specific, not generic
-2. Why this field: Genuine professional drive for Consumer Insights / Analytics / Commercial Strategy
-3. Why this company + career narrative: How their mission or market position connects with Emmanuel's trajectory and makes this the natural next step
-4. Closing: Confident, forward-looking — include Austria residency naturally as a practical readiness note (one sentence, woven in, not a standalone announcement)
+Write 3 paragraphs, 200–230 words total (body only, excluding salutation/sign-off). Structure:
+1. Opening (3–4 sentences): Why THIS specific role at THIS specific company genuinely excites Emmanuel. Be concrete — reference the company's market position, product portfolio or strategic direction. Not generic enthusiasm.
+2. Career narrative + field drive (3–4 sentences): The professional journey that makes this role the natural next step. Why Consumer Insights / Analytics / Commercial Strategy / Transformation is Emmanuel's field of choice — the intellectual pull, the impact seen firsthand.
+3. Closing (2–3 sentences): Why this is the right moment in Emmanuel's career. Include Austria residency as a single natural sentence (not a standalone announcement). Confident forward look.
 
-Rules:
+Hard rules:
+- STRICT 1-PAGE LIMIT: 200–230 words body total
 - NEVER fabricate — draw only from Emmanuel's real background
-- Human, personal, genuine — not corporate boilerplate
-- NO em dashes (— or –). Use a period or rewrite the sentence
-- NO Oxford commas (no comma before "and" in a list)
-- NO over-formal connectors like "Furthermore", "Moreover", "Additionally"
+- Human, personal, genuine — no corporate boilerplate
+- Each paragraph must feel distinct from the Cover Letter tone
+- NO em dashes (— or –). Use a period or rewrite instead
+- NO Oxford commas
+- NO over-formal connectors ("Furthermore", "Moreover", "Additionally")
 
 Return ONLY valid JSON:
 {
   "salutation": "Dear [Name/Hiring Team],",
   "opening": "...",
   "motivation_field": "...",
-  "motivation_company": "...",
   "closing": "...",
   "sign_off": "Kind regards,\\nEmmanuel Rodríguez"
 }"""
@@ -419,142 +420,107 @@ def _add_section_header(doc, text: str):
     _set_font(run2, size=8, color=(209, 213, 219))
 
 
-def _build_cl_docx(tailored: dict, job: dict) -> str:
+def _build_letter_docx(tailored: dict, job: dict, para_keys: list[str],
+                        title_label: str, fname_prefix: str,
+                        auth_paragraph: bool = False) -> str:
+    """Shared builder for Cover Letter and Motivation Letter. Enforces 1-page layout."""
     doc = Document()
 
     for section in doc.sections:
-        section.top_margin = Pt(54)
-        section.bottom_margin = Pt(54)
-        section.left_margin = Pt(72)
-        section.right_margin = Pt(72)
+        section.top_margin = Pt(42)
+        section.bottom_margin = Pt(42)
+        section.left_margin = Pt(60)
+        section.right_margin = Pt(60)
 
-    # Header
+    # Header: name
     h = doc.add_heading(HEADER['name'], 0)
+    h.paragraph_format.space_after = Pt(2)
     for run in h.runs:
+        run.font.size = Pt(16)
         run.font.color.rgb = RGBColor(30, 58, 95)
 
+    # Contact line
     contact_p = doc.add_paragraph(
-        f"{HEADER['address']}\n{HEADER['email']}  ·  {HEADER['phone']}"
+        f"{HEADER['address']}  ·  {HEADER['email']}  ·  {HEADER['phone']}"
     )
     for run in contact_p.runs:
-        _set_font(run, size=10, color=(107, 114, 128))
-    contact_p.paragraph_format.space_after = Pt(16)
+        _set_font(run, size=9.5, color=(107, 114, 128))
+    contact_p.paragraph_format.space_after = Pt(2)
 
-    # Date
-    date_p = doc.add_paragraph(datetime.now().strftime('%B %d, %Y'))
-    for run in date_p.runs:
-        _set_font(run, size=11)
-    date_p.paragraph_format.space_after = Pt(12)
+    # Thin divider
+    div = doc.add_paragraph('─' * 72)
+    div.paragraph_format.space_after = Pt(10)
+    for run in div.runs:
+        _set_font(run, size=8, color=(209, 213, 219))
+
+    # Date + label on same line
+    meta_p = doc.add_paragraph()
+    run_date = meta_p.add_run(datetime.now().strftime('%B %d, %Y'))
+    _set_font(run_date, size=10, color=(107, 114, 128))
+    run_label = meta_p.add_run(f'    {title_label}')
+    _set_font(run_label, size=10, bold=True, color=(30, 58, 95))
+    meta_p.paragraph_format.space_after = Pt(12)
 
     # Salutation
     sal_p = doc.add_paragraph(tailored.get('salutation', 'Dear Hiring Team,'))
     for run in sal_p.runs:
         _set_font(run, size=11)
-    sal_p.paragraph_format.space_after = Pt(10)
+    sal_p.paragraph_format.space_after = Pt(8)
 
     # Body paragraphs
-    for para_key in ['opening', 'body', 'company_fit']:
+    for para_key in para_keys:
         text = tailored.get(para_key, '')
         if text:
             p = doc.add_paragraph(text)
             for run in p.runs:
                 _set_font(run, size=11)
-            p.paragraph_format.space_after = Pt(10)
+            p.paragraph_format.space_after = Pt(8)
+            p.paragraph_format.line_spacing = Pt(14)
 
-    # Austria paragraph (always include)
-    auth_text = (
-        "I currently hold legal residence in Austria, ensuring full eligibility "
-        "to live and work locally without any sponsorship requirement."
-    )
-    p = doc.add_paragraph(auth_text)
-    for run in p.runs:
-        _set_font(run, size=11)
-    p.paragraph_format.space_after = Pt(10)
-
-    # Closing
-    closing = tailored.get(
-        'closing',
-        f"I would welcome the opportunity to discuss how my background can contribute to {job['company']}'s objectives. Thank you for your consideration."
-    )
-    p = doc.add_paragraph(closing)
-    for run in p.runs:
-        _set_font(run, size=11)
-    p.paragraph_format.space_after = Pt(16)
+    # Austria work authorization (cover letter only)
+    if auth_paragraph:
+        auth_text = (
+            "I currently hold legal residence in Austria and am fully eligible "
+            "to live and work locally without any sponsorship requirement."
+        )
+        p = doc.add_paragraph(auth_text)
+        for run in p.runs:
+            _set_font(run, size=11)
+        p.paragraph_format.space_after = Pt(8)
+        p.paragraph_format.line_spacing = Pt(14)
 
     # Sign off
-    p = doc.add_paragraph(tailored.get('sign_off', 'Kind regards,\nEmmanuel Rodríguez'))
-    for run in p.runs:
+    sign_p = doc.add_paragraph(tailored.get('sign_off', 'Kind regards,\nEmmanuel Rodríguez'))
+    sign_p.paragraph_format.space_before = Pt(6)
+    for run in sign_p.runs:
         _set_font(run, size=11, bold=True)
 
-    # Save
     date_str = datetime.now().strftime('%Y%m%d')
-    fname = f"CoverLetter_Emmanuel_{_safe_filename(job['company'])}_{date_str}.docx"
+    fname = f"{fname_prefix}_Emmanuel_{_safe_filename(job['company'])}_{date_str}.docx"
     path = os.path.join(OUTPUT_DIR, fname)
     doc.save(path)
-    print(f"[generator] Cover letter saved: {path}")
+    print(f"[generator] {title_label} saved: {path}")
     return path
+
+
+def _build_cl_docx(tailored: dict, job: dict) -> str:
+    return _build_letter_docx(
+        tailored, job,
+        para_keys=['opening', 'body', 'closing'],
+        title_label='COVER LETTER',
+        fname_prefix='CoverLetter',
+        auth_paragraph=True,
+    )
 
 
 def _build_ml_docx(tailored: dict, job: dict) -> str:
-    doc = Document()
-
-    for section in doc.sections:
-        section.top_margin = Pt(54)
-        section.bottom_margin = Pt(54)
-        section.left_margin = Pt(72)
-        section.right_margin = Pt(72)
-
-    # Header
-    h = doc.add_heading(HEADER['name'], 0)
-    for run in h.runs:
-        run.font.color.rgb = RGBColor(30, 58, 95)
-
-    contact_p = doc.add_paragraph(
-        f"{HEADER['address']}\n{HEADER['email']}  ·  {HEADER['phone']}"
+    return _build_letter_docx(
+        tailored, job,
+        para_keys=['opening', 'motivation_field', 'closing'],
+        title_label='LETTER OF MOTIVATION',
+        fname_prefix='MotivationLetter',
+        auth_paragraph=False,
     )
-    for run in contact_p.runs:
-        _set_font(run, size=10, color=(107, 114, 128))
-    contact_p.paragraph_format.space_after = Pt(16)
-
-    # Date
-    date_p = doc.add_paragraph(datetime.now().strftime('%B %d, %Y'))
-    for run in date_p.runs:
-        _set_font(run, size=11)
-    date_p.paragraph_format.space_after = Pt(12)
-
-    # Title
-    title_p = doc.add_paragraph('LETTER OF MOTIVATION')
-    for run in title_p.runs:
-        _set_font(run, size=12, bold=True, color=(30, 58, 95))
-    title_p.paragraph_format.space_after = Pt(12)
-
-    # Salutation
-    sal_p = doc.add_paragraph(tailored.get('salutation', 'Dear Hiring Team,'))
-    for run in sal_p.runs:
-        _set_font(run, size=11)
-    sal_p.paragraph_format.space_after = Pt(10)
-
-    # Body paragraphs
-    for para_key in ['opening', 'motivation_field', 'motivation_company', 'closing']:
-        text = tailored.get(para_key, '')
-        if text:
-            p = doc.add_paragraph(text)
-            for run in p.runs:
-                _set_font(run, size=11)
-            p.paragraph_format.space_after = Pt(10)
-
-    # Sign off
-    p = doc.add_paragraph(tailored.get('sign_off', 'Kind regards,\nEmmanuel Rodríguez'))
-    for run in p.runs:
-        _set_font(run, size=11, bold=True)
-
-    # Save
-    date_str = datetime.now().strftime('%Y%m%d')
-    fname = f"MotivationLetter_Emmanuel_{_safe_filename(job['company'])}_{date_str}.docx"
-    path = os.path.join(OUTPUT_DIR, fname)
-    doc.save(path)
-    print(f"[generator] Motivation letter saved: {path}")
-    return path
 
 
 def generate_and_send(job: dict) -> tuple[str, str, str]:
@@ -594,10 +560,9 @@ def generate_and_send(job: dict) -> tuple[str, str, str]:
         print(f"[generator] Claude ML error: {e} — using fallback")
         tailored_ml = {
             'salutation': 'Dear Hiring Team,',
-            'opening': f"I am writing to express my strong motivation for the {job['title']} role at {job['company']}.",
-            'motivation_field': '',
-            'motivation_company': '',
-            'closing': 'I look forward to the opportunity to discuss how my background aligns with your goals. I am based in Austria with full eligibility to work locally.',
+            'opening': f"The {job['title']} role at {job['company']} is a natural fit for where I am in my career and what I want to build next.",
+            'motivation_field': 'Spending a decade in Consumer Insights and Commercial Strategy has reinforced one conviction: the sharpest competitive advantage in FMCG is the ability to translate data into decisions at speed. That is the work I do best and the work I want to keep doing at a higher level.',
+            'closing': f"I am based in Austria with full work eligibility and ready to contribute from day one. I would welcome the chance to discuss how my background aligns with {job['company']}'s direction.",
             'sign_off': 'Kind regards,\nEmmanuel Rodríguez',
         }
 

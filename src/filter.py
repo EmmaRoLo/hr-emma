@@ -253,17 +253,34 @@ def _is_german_language(text: str) -> bool:
         return False
 
 
+# Title keywords that override Zone 4 company exclusion.
+# A pharma/energy company hiring a commercial/insights role is still relevant.
+_ZONE4_COMMERCIAL_OVERRIDE = [
+    'insights', 'analytics', 'consumer', 'shopper', 'category',
+    'commercial', 'strategy', 'marketing', 'brand', 'customer',
+    'market research', 'business development', 'transformation',
+    'media', 'connections', 'engagement',
+]
+
+
 def _detect_zone(title: str, company: str, description: str) -> int:
     """
     Returns 1, 2, 3, or 4.
     Checks Zone 4 first (hard excludes), then Zone 1, then Zone 2, then Zone 3.
     Default if nothing matches: Zone 2 (Adjacent) -- gives benefit of the doubt.
+
+    Zone 4 override: if a Zone 4 company is hiring for a commercial/insights role
+    (detected from title), demote to Zone 3 instead of excluding entirely.
     """
     text = (title + ' ' + company + ' ' + description[:1500]).lower()
+    title_l = title.lower()
 
-    # Zone 4 check first -- hard out
+    # Zone 4 check first
     for kw in ZONE_4_EXCLUDED:
         if kw in text:
+            # Override: commercial/insights roles at Zone 4 companies → Zone 3
+            if any(ov in title_l for ov in _ZONE4_COMMERCIAL_OVERRIDE):
+                return 3
             return 4
 
     # Zone 1 -- core sweet spot

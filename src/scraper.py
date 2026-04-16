@@ -70,6 +70,8 @@ SEARCH_CONFIGS = [
     {"keywords": "Category Manager",                    "location": "Austria", "remote": False},
     {"keywords": "E-Commerce Manager Director",         "location": "Austria", "remote": False},
     {"keywords": "International Manager",               "location": "Austria", "remote": False},
+    {"keywords": "Manager",                              "location": "Austria", "remote": False, "pages": 4},
+    {"keywords": "Customer Insights",                   "location": "Austria", "remote": False},
 
     # ══════════════════════════════════════════════════════════════════════
     # EUROPE REMOTE — BROAD SWEEPS
@@ -432,7 +434,7 @@ async def scrape_jobs(notify_login_error=None) -> list[dict]:
 
                 all_jobs.extend(open_jobs)
 
-                if len(cards) < 20:
+                if len(cards) < 10:
                     break
 
                 time.sleep(random.uniform(10.0, 20.0))

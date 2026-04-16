@@ -75,9 +75,20 @@ def run_pipeline():
 
 def create_scheduler() -> BackgroundScheduler:
     # Railway runs in UTC. Mexico City = UTC-6 (no DST since 2023).
+    # 1am MX  =  7:00 UTC
     # 7am MX  = 13:00 UTC
     # 12pm MX = 18:00 UTC
     scheduler = BackgroundScheduler(timezone='UTC')
+
+    scheduler.add_job(
+        run_pipeline,
+        trigger='cron',
+        hour=7,
+        minute=0,
+        id='pipeline_night',     # 1am MX
+        max_instances=1,
+        coalesce=True,
+    )
 
     scheduler.add_job(
         run_pipeline,

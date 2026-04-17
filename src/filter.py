@@ -173,6 +173,7 @@ AREA_TIER1 = [
     'consumer insights', 'market insights', 'market & insights', 'market intelligence',
     'shopper insights', 'shopper analytics', 'category insights', 'category analytics',
     'market research', 'panel data', 'consumer research',
+    'customer insights', 'customer analytics',
     # Analytics
     'analytics', 'data analytics', 'advanced analytics', 'business intelligence',
     'category management', 'performance analytics',
@@ -215,6 +216,13 @@ AREA_TIER2 = [
     'senior account manager', 'global account manager',
     # Location / Incentives / Tax Strategy
     'location services', 'global location', 'tax incentives director',
+    # Shopper & Trade Marketing (core FMCG commercial)
+    'shopper marketing',
+    'trade marketing',
+    # Customer Engagement & Media (modern CPG/FMCG roles)
+    'customer engagement', 'engagement manager', 'engagement director',
+    'media & connections', 'media planning', 'media strategy',
+    'connections planning', 'brand connections',
 ]
 
 # Tier 3 — Acceptable: Operations, Marketing, Trade
@@ -223,10 +231,9 @@ AREA_TIER3 = [
     # Operations
     'operations director', 'operational excellence', 'operations manager',
     'revenue operations', 'sales operations',
-    # Marketing & Trade
+    # Marketing
     'marketing director', 'marketing manager', 'brand strategy',
-    'trade marketing', 'shopper marketing', 'growth marketing',
-    'campaign management', 'market positioning', 'marketing',
+    'growth marketing', 'campaign management', 'market positioning', 'marketing',
 ]
 
 KNOWN_FMCG_COMPANIES = set(ZONE_1_CORE)
@@ -341,6 +348,7 @@ HYBRID_KW  = ['hybrid']
 
 # Countries/regions outside Austria where Emmanuel CANNOT work on-site
 NON_AUSTRIA_KW = [
+    # Europe
     'united kingdom', ' uk ', 'england', 'london', 'manchester', 'birmingham',
     'germany', 'berlin', 'munich', 'münchen', 'frankfurt', 'hamburg',
     'france', 'paris', 'netherlands', 'amsterdam', 'spain', 'madrid', 'barcelona',
@@ -349,6 +357,24 @@ NON_AUSTRIA_KW = [
     'sweden', 'stockholm', 'denmark', 'copenhagen', 'norway', 'oslo',
     'finland', 'helsinki', 'belgium', 'brussels', 'portugal', 'lisbon',
     'ireland', 'dublin', 'romania', 'bucharest', 'croatia', 'slovakia',
+    # Americas
+    'united states', ' usa', 'canada', 'toronto', 'vancouver',
+    'new york', 'boston', 'chicago', 'san francisco', 'los angeles',
+    'seattle', 'austin', 'atlanta', 'miami', 'houston', 'dallas',
+    'washington', 'philadelphia', 'denver', 'minneapolis',
+    # US state abbreviations (comma-prefixed to avoid false matches like "may")
+    ', ma', ', ny', ', ca', ', tx', ', il', ', wa', ', ga', ', fl',
+    ', pa', ', oh', ', nc', ', va', ', co', ', az', ', mn', ', mi',
+    ', nj', ', ct', ', md', ', or', ', tn', ', mo', ', wi',
+    # APAC
+    'singapore', 'hong kong', 'tokyo', 'japan', 'sydney', 'australia',
+    'india', 'bangalore', 'mumbai', 'china', 'beijing', 'shanghai',
+    'dubai', 'uae', 'middle east', 'south korea', 'seoul', 'taiwan',
+    # LATAM
+    'brazil', 'são paulo', 'sao paulo', 'mexico city', 'buenos aires',
+    'argentina', 'colombia', 'bogota', 'chile', 'santiago',
+    # Africa
+    'south africa', 'johannesburg', 'nairobi',
 ]
 
 
@@ -390,9 +416,10 @@ def _is_location_eligible(location: str, description: str) -> bool:
     if has_non_austria_city:
         return False
 
-    # No specific city anchor — allow if remote mentioned
-    is_remote = any(k in combined for k in REMOTE_KW) or any(k in combined for k in FULLY_REMOTE_KW)
-    if is_remote:
+    # No specific city anchor — require strong fully-remote signal (REMOTE_KW is too loose;
+    # "home office" and "wfh" appear in on-site job perks)
+    has_fully_remote = any(k in combined for k in FULLY_REMOTE_KW)
+    if has_fully_remote:
         return True
 
     return False

@@ -72,6 +72,10 @@ SEARCH_CONFIGS = [
     {"keywords": "International Manager",               "location": "Austria", "remote": False},
     {"keywords": "Manager",                              "location": "Austria", "remote": False, "pages": 4},
     {"keywords": "Customer Insights",                   "location": "Austria", "remote": False},
+    {"keywords": "Shopper Marketing Manager",           "location": "Austria", "remote": False},
+    {"keywords": "Media Manager Director",              "location": "Austria", "remote": False},
+    {"keywords": "Customer Engagement Manager",         "location": "Austria", "remote": False},
+    {"keywords": "Trade Marketing Manager",             "location": "Austria", "remote": False},
 
     # ══════════════════════════════════════════════════════════════════════
     # EUROPE REMOTE — BROAD SWEEPS
@@ -100,6 +104,10 @@ SEARCH_CONFIGS = [
     {"keywords": "Innovation Director",                 "location": "Europe",  "remote": True},
     {"keywords": "Shopper Insights Director Manager",   "location": "Europe",  "remote": True},
     {"keywords": "Category Analytics Director",         "location": "Europe",  "remote": True},
+    {"keywords": "Shopper Marketing Director",          "location": "Europe",  "remote": True},
+    {"keywords": "Media Strategy Director",             "location": "Europe",  "remote": True},
+    {"keywords": "Customer Engagement Director",        "location": "Europe",  "remote": True},
+    {"keywords": "Trade Marketing Director",            "location": "Europe",  "remote": True},
 ]
 
 BASE_URL = "https://www.linkedin.com/jobs/search/"

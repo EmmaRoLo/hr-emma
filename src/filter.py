@@ -251,13 +251,32 @@ def _requires_german(text: str) -> bool:
     return any(p.search(text) for p in GERMAN_RE)
 
 
+_GERMAN_FUNCTION_WORDS = re.compile(
+    r'\b(und|die|der|das|für|mit|bei|auf|von|zu|im|ist|sind|wir|sie|ihr|ihre|ihnen|'
+    r'werden|haben|wird|wurde|können|müssen|soll|sollen|über|unter|nach|durch|'
+    r'unsere|unser|unserer|unserem|einer|einen|einem|eines|dieser|dieses|diesem|'
+    r'werden|wurde|wäre|haben|hatte|können|könnte|suchen|bieten|arbeiten|'
+    r'stellenangebot|stellenbeschreibung|aufgaben|anforderungen|lebenslauf|'
+    r'bewerbung|bewerben|kenntnisse|erfahrungen|fähigkeiten)\b',
+    re.IGNORECASE
+)
+
 def _is_german_language(text: str) -> bool:
-    if not LANGDETECT_AVAILABLE or not text or len(text) < 50:
+    if not text or len(text) < 50:
         return False
-    try:
-        return detect(text[:2000]) == 'de'
-    except Exception:
-        return False
+    # Keyword-based fallback: count German function words by density
+    words = len(text.split())
+    if words > 0:
+        matches = len(_GERMAN_FUNCTION_WORDS.findall(text[:3000]))
+        if matches / min(words, 300) > 0.15:  # >15% German function words → German post
+            return True
+    # langdetect as secondary confirmation
+    if LANGDETECT_AVAILABLE:
+        try:
+            return detect(text[:2000]) == 'de'
+        except Exception:
+            pass
+    return False
 
 
 # Title keywords that override Zone 4 company exclusion.

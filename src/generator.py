@@ -237,9 +237,10 @@ def _docx_to_pdf(docx_path: str) -> str | None:
     try:
         out_dir = os.path.dirname(docx_path)
         print(f"[generator] Converting to PDF: {docx_path}", flush=True)
+        env = {**os.environ, 'HOME': '/tmp'}
         result = subprocess.run(
-            [lo, '--headless', '--convert-to', 'pdf', '--outdir', out_dir, docx_path],
-            capture_output=True, text=True, timeout=60
+            [lo, '--headless', '--norestore', '--convert-to', 'pdf', '--outdir', out_dir, docx_path],
+            capture_output=True, text=True, timeout=60, env=env
         )
         print(f"[generator] LO returncode={result.returncode} stdout={result.stdout[:100]} stderr={result.stderr[:100]}", flush=True)
         if result.returncode == 0:

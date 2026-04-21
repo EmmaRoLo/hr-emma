@@ -131,3 +131,16 @@ def get_all_non_pending() -> list[dict]:
             "SELECT * FROM jobs WHERE status != 'pending' ORDER BY found_at DESC LIMIT 200"
         ).fetchall()
         return [dict(r) for r in rows]
+
+
+def delete_old_pending(hours: int = 24) -> int:
+    """Delete pending jobs older than `hours` hours. Returns count deleted."""
+    with _connect() as conn:
+        cur = conn.execute(
+            """DELETE FROM jobs
+               WHERE status = 'pending'
+               AND found_at < datetime('now', ? || ' hours')""",
+            (f'-{hours}',)
+        )
+        conn.commit()
+        return cur.rowcount

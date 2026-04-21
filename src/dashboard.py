@@ -191,6 +191,14 @@ def refilter_pending():
     return jsonify({'ok': True, 'skipped': skipped, 'remaining': len(jobs) - skipped})
 
 
+@app.route('/admin/cleanup-pending', methods=['POST'])
+def cleanup_pending():
+    """Delete pending jobs older than 24 hours."""
+    from src.database import delete_old_pending
+    deleted = delete_old_pending(hours=24)
+    return jsonify({'ok': True, 'deleted': deleted})
+
+
 @app.route('/admin/send-digest', methods=['POST'])
 def send_digest():
     """Manually trigger email digest for all pending jobs."""

@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from src.database import get_pending_jobs, job_exists, log_run, save_jobs
+from src.database import delete_old_pending, job_exists, log_run, save_jobs
 from src.filter import filter_and_score
 from src.mailer import send_alert, send_job_digest
 from src.scraper import scrape_jobs
@@ -31,6 +31,11 @@ def reset_apply_counter():
 def run_pipeline():
     """Pipeline: scrape → filter → save → notify. Runs at 7am and 12pm MX time."""
     print('\n[pipeline] --- Starting pipeline run ---')
+
+    # 0. Clean up stale pending jobs (older than 24h) before scraping
+    expired = delete_old_pending(hours=24)
+    if expired:
+        print(f"[pipeline] Expired {expired} pending jobs older than 24h")
 
     # 1. Scrape
     raw_jobs = asyncio.run(scrape_jobs(notify_login_error=send_alert))
@@ -51,24 +56,20 @@ def run_pipeline():
     inserted = save_jobs(all_to_insert)
     print(f"[pipeline] Inserted {inserted} new rows to DB")
 
-    # 4. Notify by email — new jobs this run + all pending in DB
+    # 4. Notify by email — ONLY new jobs found this run (no reminder digests)
     new_pending = [j for j in to_save if j.get('status') == 'pending']
-    all_pending = get_pending_jobs()
 
     if new_pending:
-        print(f"[pipeline] Sending digest: {len(new_pending)} new + {len(all_pending)} total pending")
-        send_job_digest(all_pending)
-    elif all_pending:
-        print(f"[pipeline] No new jobs but {len(all_pending)} still pending — sending reminder digest")
-        send_job_digest(all_pending)
+        print(f"[pipeline] Sending digest: {len(new_pending)} new jobs")
+        send_job_digest(new_pending)
     else:
-        print("[pipeline] No pending jobs to notify about.")
+        print("[pipeline] No new pending jobs — skipping digest.")
 
     log_run(
         jobs_found=len(raw_jobs),
         jobs_new=len(to_save),
         applied=0,
-        notes=f"skipped={len(skipped)}"
+        notes=f"skipped={len(skipped)}, expired={expired}"
     )
     print('[pipeline] --- Run complete ---\n')
 

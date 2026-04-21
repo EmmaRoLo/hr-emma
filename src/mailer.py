@@ -91,15 +91,23 @@ def send_job_digest(jobs: list[dict]) -> bool:
     # Sort by score
     sorted_jobs = sorted(jobs, key=lambda j: j.get('score', 0), reverse=True)
 
+    base_url = _get_dashboard_url()
     rows = ''
     for job in sorted_jobs:
         score = job.get('score', 0)
+        job_url = f"{base_url}/job/{job['id']}"
+        linkedin_url = job.get('url', '')
         rows += f"""
         <tr style="border-bottom:1px solid #e5e7eb">
-          <td style="padding:10px 8px;font-weight:600;color:#1e3a5f">{job['title']}</td>
+          <td style="padding:10px 8px;font-weight:600">
+            <a href="{job_url}" style="color:#1e3a5f;text-decoration:none">{job['title']}</a>
+          </td>
           <td style="padding:10px 8px;color:#374151">{job['company']}</td>
           <td style="padding:10px 8px;color:#6b7280">{job.get('location','')}</td>
           <td style="padding:10px 8px;text-align:center">{_score_badge(score)}</td>
+          <td style="padding:10px 8px;text-align:center">
+            {'<a href="' + linkedin_url + '" style="color:#2563eb;font-size:12px">LI →</a>' if linkedin_url else ''}
+          </td>
         </tr>"""
 
     html = f"""
@@ -118,6 +126,7 @@ def send_job_digest(jobs: list[dict]) -> bool:
             <th style="padding:10px 8px;text-align:left;color:#374151">Empresa</th>
             <th style="padding:10px 8px;text-align:left;color:#374151">Ubicación</th>
             <th style="padding:10px 8px;text-align:center;color:#374151">Score</th>
+            <th style="padding:10px 8px;text-align:center;color:#374151">Link</th>
           </tr>
         </thead>
         <tbody>{rows}</tbody>

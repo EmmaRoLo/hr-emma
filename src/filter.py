@@ -148,11 +148,11 @@ ZONE_LABELS = {1: 'Core', 2: 'Adjacent', 3: 'Stretch', 4: 'Out of scope'}
 # Cross matrix: ZONE_TIER_MATRIX[zone][tier] = (multiplier, class_label)
 # Zone 4 always = 0 regardless of tier
 ZONE_TIER_MATRIX = {
-    #        Tier 1 (Strategy/Insights/Analytics)  Tier 2 (Commercial/Transformation)  Tier 3 (Operations/Marketing)
-    1: {1: (1.00, 'A - Prime'),    2: (0.95, 'B - Strong'),  3: (0.85, 'C - Good')  },
-    2: {1: (0.90, 'B - Strong'),   2: (0.80, 'C - Good'),    3: (0.65, 'D - Weak')  },
-    3: {1: (0.75, 'C - Good'),     2: (0.60, 'D - Weak'),    3: (0.00, 'E - Skip')  },
-    4: {1: (0.00, 'Skip'),         2: (0.00, 'Skip'),         3: (0.00, 'Skip')      },
+    #        T1 (Insights/Analytics/Transform)  T2 (Commercial/Sales/Trade)  T3 (Marketing/Ops)  T0 (no function match)
+    1: {1: (1.00, 'A - Prime'),  2: (0.95, 'B - Strong'), 3: (0.85, 'C - Good'), 0: (0.55, 'D - Weak') },
+    2: {1: (0.90, 'B - Strong'), 2: (0.80, 'C - Good'),  3: (0.65, 'D - Weak'), 0: (0.00, 'E - Skip') },
+    3: {1: (0.75, 'C - Good'),   2: (0.60, 'D - Weak'),  3: (0.00, 'E - Skip'), 0: (0.00, 'E - Skip') },
+    4: {1: (0.00, 'Skip'),       2: (0.00, 'Skip'),       3: (0.00, 'Skip'),     0: (0.00, 'Skip')     },
 }
 
 
@@ -163,63 +163,62 @@ TITLE_DIRECTOR_KW   = ['director', 'head of', 'vp ', 'vice president', 'chief', 
 TITLE_SR_MANAGER_KW = ['senior manager', 'sr manager', 'sr. manager', 'lead manager', 'senior lead']
 TITLE_MANAGER_KW    = ['manager', 'lead', 'principal']
 
-# Tier 1 — Core expertise: Strategy, Market Insights, Consumer Insights, Analytics, Shopper
-# These are Emmanuel's deepest skills — 10 years of direct experience
+# Tier 1 — Core expertise: Insights, Analytics, Shopper, Category, Transformation
+# Emmanuel's deepest skills (7-10 years) + current strategic direction
 AREA_TIER1 = [
-    # Strategy
-    'strategic planning', 'strategy director', 'head of strategy',
-    'business strategy', 'go-to-market strategy', 'revenue strategy', 'growth strategy',
-    # Market & Consumer Insights
-    'consumer insights', 'market insights', 'market & insights', 'market intelligence',
-    'shopper insights', 'shopper analytics', 'category insights', 'category analytics',
-    'market research', 'panel data', 'consumer research',
-    'customer insights', 'customer analytics',
-    # Analytics
+    # Insights (standalone + compound — all variants of his core expertise)
+    'insights', 'consumer insights', 'market insights', 'market & insights',
+    'market intelligence', 'shopper insights', 'category insights',
+    'customer insights', 'commercial insights', 'people insights',
+    'consumer research', 'market research', 'panel data',
+    # Analytics (standalone + compound)
     'analytics', 'data analytics', 'advanced analytics', 'business intelligence',
-    'category management', 'performance analytics',
+    'shopper analytics', 'category analytics', 'customer analytics',
+    'performance analytics', 'revenue analytics', 'commercial analytics',
+    # Category Management
+    'category management', 'category director', 'category lead',
+    # Strategy (specific, not generic "strategy" alone)
+    'strategic planning', 'strategy director', 'head of strategy',
+    'business strategy', 'go-to-market strategy', 'revenue strategy',
+    'growth strategy', 'revenue growth management', 'rgm',
+    # Business Transformation (current role — user confirmed Tier 1)
+    'business transformation', 'transformation director', 'transformation lead',
+    'transformation program', 'commercial transformation', 'operating model',
+    'organisational transformation', 'organizational transformation',
+    'capability building',
 ]
 
-# Tier 2 — Strong fit: Commercial, Transformation
-# Current role territory — solid match, slightly less depth than Tier 1
+# Tier 2 — Strong fit: Commercial, Sales, Trade, Media
+# 4+ years of experience across PepsiCo / Walmart roles
 AREA_TIER2 = [
     # Commercial
     'commercial strategy', 'commercial excellence', 'commercial director',
-    'commercial insights', 'commercial analytics', 'commercial lead',
-    'commercial transformation', 'commercial operations', 'commercial manager',
+    'commercial lead', 'commercial operations', 'commercial manager',
     # Business Development
     'business development director', 'business development manager',
     'regional business development', 'after sales business development',
     'head of business development', 'business development lead',
     'sales business development', 'strategic business development',
-    # Transformation / Innovation
-    'business transformation', 'transformation director', 'transformation lead',
-    'transformation program', 'operating model', 'capability building',
-    'organisational transformation', 'organizational transformation',
+    # Innovation (adjacent to transformation)
     'operational innovation', 'innovation partner', 'innovation director',
     'innovation lead', 'process innovation', 'continuous improvement',
-    # Sales (global/regional/strategic sales director-level)
+    # Sales (director-level, strategic)
     'global sales manager', 'global sales director', 'regional sales director',
     'sales director', 'head of sales', 'vp sales', 'chief sales',
     'sales strategy', 'sales excellence', 'strategic sales',
     # Portfolio / Product Management (senior)
     'portfolio manager', 'portfolio director', 'head of portfolio',
     'product portfolio', 'portfolio strategy',
-    # Sustainability / ESG (strategy-level)
-    'sustainability lead', 'sustainability director', 'head of sustainability',
-    'global sustainability', 'esg director', 'esg lead', 'esg strategy',
-    # Finance (strategic / commercial finance)
+    # Finance (commercial / strategic only — not generic finance)
     'strategic finance', 'finance director', 'head of finance',
     'commercial finance', 'finance strategy', 'fp&a director',
-    'financial planning', 'expert manager', 'finance manager',
+    'financial planning',
     # Account Director (senior commercial role)
     'account director', 'global account director', 'key account director',
     'senior account manager', 'global account manager',
-    # Location / Incentives / Tax Strategy
-    'location services', 'global location', 'tax incentives director',
-    # Shopper & Trade Marketing (core FMCG commercial)
-    'shopper marketing',
-    'trade marketing',
-    # Customer Engagement & Media (modern CPG/FMCG roles)
+    # Shopper & Trade Marketing (FMCG commercial)
+    'shopper marketing', 'trade marketing',
+    # Customer Engagement & Media
     'customer engagement', 'engagement manager', 'engagement director',
     'media & connections', 'media planning', 'media strategy',
     'connections planning', 'brand connections',
@@ -235,6 +234,52 @@ AREA_TIER3 = [
     'marketing director', 'marketing manager', 'brand strategy',
     'growth marketing', 'campaign management', 'market positioning', 'marketing',
 ]
+
+# ── HARD-EXCLUDE FUNCTIONS (title-level) ─────────────────────────────────────
+# Jobs in these functions are irrelevant regardless of company or zone.
+# Checked against the job TITLE only (description may legitimately mention these).
+AREA_EXCLUDED_FUNCTIONS = [
+    # HR / People / Talent
+    'human resources', ' hr ', 'hr director', 'hr manager', 'hr business partner',
+    'hrbp', 'talent acquisition', 'talent management', 'talent development',
+    'people & culture', 'people director', 'people operations', 'people manager',
+    'chief people officer', 'head of people', 'head of hr', 'vp people', 'vp hr',
+    'workforce planning', 'employee experience', 'employer branding',
+    'organizational development', 'organisational development',
+    'learning & development', 'learning and development', 'l&d director',
+    'compensation & benefits', 'total rewards', 'payroll',
+    # Legal / Compliance / Regulatory
+    'legal director', 'legal counsel', 'general counsel', 'chief legal',
+    'head of legal', 'vp legal', 'legal manager', 'legal advisor',
+    'compliance director', 'compliance manager', 'chief compliance',
+    'head of compliance', 'regulatory affairs', 'regulatory director',
+    'data protection', 'privacy officer', 'dpo ',
+    # IT / Technology infrastructure (not analytics/digital)
+    'it director', 'chief information officer', ' cio ', 'head of it',
+    'it manager', 'infrastructure director', 'network director',
+    'cybersecurity director', 'information security', 'ciso',
+    'software engineering director', 'engineering manager', 'vp engineering',
+    'head of engineering', 'chief technology officer', ' cto ',
+    # Procurement / Sourcing / Supply Chain
+    'procurement director', 'procurement manager', 'head of procurement',
+    'sourcing director', 'sourcing manager', 'strategic sourcing',
+    'supply chain director', 'supply chain manager', 'head of supply chain',
+    'logistics director', 'logistics manager', 'head of logistics',
+    # Finance / Accounting (non-commercial)
+    'financial controller', 'finance controller', 'chief accounting',
+    'head of accounting', 'tax director', 'head of tax', 'treasury director',
+    'internal audit', 'audit director', 'risk director', 'head of risk',
+    # Real Estate / Facilities
+    'real estate director', 'facilities director', 'head of facilities',
+    'property director', 'asset manager',
+]
+_AREA_EXCLUDED_RE = [re.compile(re.escape(p), re.IGNORECASE) for p in AREA_EXCLUDED_FUNCTIONS]
+
+
+def _is_excluded_function(title: str) -> bool:
+    """Return True if the job title is in an irrelevant function area."""
+    t = ' ' + title.lower() + ' '  # pad to allow word-boundary matching for ' hr '
+    return any(p.search(t) for p in _AREA_EXCLUDED_RE)
 
 KNOWN_FMCG_COMPANIES = set(ZONE_1_CORE)
 
@@ -337,28 +382,27 @@ def _score_title(title: str) -> int:
     return 8
 
 
-def _detect_area_tier(title: str, description: str) -> int:
-    """Returns 1, 2, or 3. Title match takes priority over description match."""
+def _detect_area_tier(title: str, _description: str) -> int:
+    """
+    Returns 1, 2, 3, or 0.
+    Tier is determined by JOB TITLE only — the function you're being hired into.
+    Description is intentionally excluded: it always mentions 'analytics', 'strategy',
+    etc. regardless of the actual role, causing false Tier 1/2 inflation.
+    0 = no relevant function detected → penalized score via ZONE_TIER_MATRIX.
+    """
     tl = title.lower()
-    dl = description.lower()
     for kw in AREA_TIER1:
         if kw in tl: return 1
     for kw in AREA_TIER2:
         if kw in tl: return 2
     for kw in AREA_TIER3:
         if kw in tl: return 3
-    for kw in AREA_TIER1:
-        if kw in dl: return 1
-    for kw in AREA_TIER2:
-        if kw in dl: return 2
-    for kw in AREA_TIER3:
-        if kw in dl: return 3
-    return 3  # default to Tier 3 if no match — still gets scored, just lower
+    return 0  # no function match in title
 
 
 def _score_area(tier: int) -> int:
-    """Convert tier to base area points."""
-    return {1: 30, 2: 27, 3: 22}.get(tier, 22)
+    """Convert tier to base area points. Tier 0 = no function match."""
+    return {1: 30, 2: 27, 3: 22, 0: 5}.get(tier, 5)
 
 
 AUSTRIA_KW = ['austria', 'wien', 'vienna', 'graz', 'salzburg', 'linz', 'innsbruck', 'klagenfurt']

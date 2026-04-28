@@ -224,14 +224,22 @@ AREA_TIER2 = [
     'connections planning', 'brand connections',
 ]
 
-# Tier 3 — Acceptable: Operations, Marketing, Trade
-# Transferable skills but not primary expertise
+# Tier 2 additions — Marketing leadership (natural move from Insights/Analytics in FMCG)
+# Added here rather than inline above to keep Tier 2 block readable
+AREA_TIER2 += [
+    'marketing director', 'head of marketing', 'vp marketing', 'vp of marketing',
+    'chief marketing', 'cmo',
+    'brand director', 'head of brand', 'brand strategy director',
+    'growth marketing director', 'growth marketing lead',
+]
+
+# Tier 3 — Acceptable: Operations, executional Marketing
 AREA_TIER3 = [
     # Operations
     'operations director', 'operational excellence', 'operations manager',
     'revenue operations', 'sales operations',
-    # Marketing
-    'marketing director', 'marketing manager', 'brand strategy',
+    # Executional / broad marketing (no seniority or strategy signal)
+    'marketing manager', 'brand manager', 'brand strategy',
     'growth marketing', 'campaign management', 'market positioning', 'marketing',
 ]
 

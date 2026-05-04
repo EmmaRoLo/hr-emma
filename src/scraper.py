@@ -108,6 +108,27 @@ SEARCH_CONFIGS = [
     {"keywords": "Media Strategy Director",             "location": "Europe",  "remote": True},
     {"keywords": "Customer Engagement Director",        "location": "Europe",  "remote": True},
     {"keywords": "Trade Marketing Director",            "location": "Europe",  "remote": True},
+
+    # ══════════════════════════════════════════════════════════════════════
+    # DACH — GERMANY (largest FMCG market in DACH)
+    # ══════════════════════════════════════════════════════════════════════
+    {"keywords": "Consumer Insights Director",          "location": "Germany", "remote": False},
+    {"keywords": "Head of Insights",                    "location": "Germany", "remote": False},
+    {"keywords": "Analytics Director Manager",          "location": "Germany", "remote": False},
+    {"keywords": "Business Transformation Director",    "location": "Germany", "remote": False},
+    {"keywords": "Commercial Strategy Director",        "location": "Germany", "remote": False},
+    {"keywords": "Shopper Analytics Manager Director",  "location": "Germany", "remote": False},
+    {"keywords": "Marketing Director FMCG",             "location": "Germany", "remote": False},
+    {"keywords": "Digital Transformation Director",     "location": "Germany", "remote": False},
+
+    # ══════════════════════════════════════════════════════════════════════
+    # DACH — SWITZERLAND
+    # ══════════════════════════════════════════════════════════════════════
+    {"keywords": "Consumer Insights Director",          "location": "Switzerland", "remote": False},
+    {"keywords": "Head of Insights Analytics",          "location": "Switzerland", "remote": False},
+    {"keywords": "Business Transformation Director",    "location": "Switzerland", "remote": False},
+    {"keywords": "Commercial Strategy Director",        "location": "Switzerland", "remote": False},
+    {"keywords": "Marketing Director FMCG",             "location": "Switzerland", "remote": False},
 ]
 
 BASE_URL = "https://www.linkedin.com/jobs/search/"

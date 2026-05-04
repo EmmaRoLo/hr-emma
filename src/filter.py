@@ -186,6 +186,15 @@ AREA_TIER1 = [
     'transformation program', 'commercial transformation', 'operating model',
     'organisational transformation', 'organizational transformation',
     'capability building',
+    # Digital Transformation / DX
+    'digital transformation', 'digital excellence', 'dx director', 'dx lead',
+    'head of digital transformation',
+    # AI / Data Science
+    'ai strategy', 'artificial intelligence director', 'head of ai', 'ai director',
+    'ai lead', 'data science director', 'head of data science',
+    'data & analytics', 'data and analytics',
+    # Revenue Management
+    'revenue management director', 'head of revenue management',
 ]
 
 # Tier 2 — Strong fit: Commercial, Sales, Trade, Media
@@ -231,6 +240,10 @@ AREA_TIER2 += [
     'chief marketing', 'cmo',
     'brand director', 'head of brand', 'brand strategy director',
     'growth marketing director', 'growth marketing lead',
+    # Digital / E-commerce (adjacent commercial)
+    'digital marketing director', 'head of digital marketing',
+    'e-commerce director', 'ecommerce director', 'head of e-commerce',
+    'head of ecommerce', 'digital commerce director',
 ]
 
 # Tier 3 — Acceptable: Operations, executional Marketing
@@ -417,13 +430,21 @@ AUSTRIA_KW = ['austria', 'wien', 'vienna', 'graz', 'salzburg', 'linz', 'innsbruc
 REMOTE_KW  = ['remote', 'work from home', 'wfh', 'anywhere', 'fully remote', 'home office']
 HYBRID_KW  = ['hybrid']
 
-# Countries/regions outside Austria where Emmanuel CANNOT work on-site
+# DACH: Germany + Switzerland — eligible alongside Austria (user confirmed)
+DACH_KW = [
+    'germany', 'deutschland', 'berlin', 'munich', 'münchen', 'frankfurt',
+    'hamburg', 'cologne', 'köln', 'düsseldorf', 'dusseldorf', 'stuttgart',
+    'dortmund', 'leipzig', 'dresden', 'hannover', 'nuremberg', 'nürnberg',
+    'switzerland', 'schweiz', 'zurich', 'zürich', 'geneva', 'genève',
+    'bern', 'lausanne', 'basel', 'zug',
+]
+
+# Countries/regions outside DACH where Emmanuel CANNOT work on-site
 NON_AUSTRIA_KW = [
-    # Europe
+    # Europe (Germany + Switzerland removed — now in DACH_KW)
     'united kingdom', ' uk ', 'england', 'london', 'manchester', 'birmingham',
-    'germany', 'berlin', 'munich', 'münchen', 'frankfurt', 'hamburg',
     'france', 'paris', 'netherlands', 'amsterdam', 'spain', 'madrid', 'barcelona',
-    'italy', 'milan', 'rome', 'switzerland', 'zurich', 'zürich', 'geneva',
+    'italy', 'milan', 'rome',
     'poland', 'warsaw', 'czech', 'prague', 'hungary', 'budapest',
     'sweden', 'stockholm', 'denmark', 'copenhagen', 'norway', 'oslo',
     'finland', 'helsinki', 'belgium', 'brussels', 'portugal', 'lisbon',
@@ -457,40 +478,42 @@ HYBRID_SIGNALS = [
 FULLY_REMOTE_KW = ['fully remote', 'fully-remote', '100% remote', 'remote only',
                    'remote position', 'remote role', 'remote job', 'remote work',
                    'work from anywhere', 'anywhere in', 'location: remote',
-                   'remote (', '(remote)', 'remote –', 'remote —']
+                   'remote (', '(remote)', 'remote –', 'remote —',
+                   'remote-first', 'remote first', 'work remotely', 'eu remote',
+                   'europe remote', 'open to remote', 'remotely based', 'remote based',
+                   'home-based', 'home based', 'anywhere in europe',
+                   'remote across europe', 'remote, europe', 'remote europe',
+                   'location flexible', 'flexible location', 'location: flexible']
 
 
 def _is_location_eligible(location: str, description: str) -> bool:
     """
     Hard location filter:
-    - Austria (onsite, hybrid, remote)  → eligible
+    - DACH (Austria + Germany + Switzerland): all work modes eligible
     - Rest of EU/world: FULLY remote only (no hybrid, no WFH partial)
     """
     loc  = location.lower()
     desc = description[:800].lower()
     combined = loc + ' ' + desc
 
-    is_austria = any(k in combined for k in AUSTRIA_KW)
-
     # Austria: all work modes allowed
-    if is_austria:
+    if any(k in combined for k in AUSTRIA_KW):
         return True
 
-    # Non-Austria: reject if hybrid signals found
-    is_hybrid = any(k in combined for k in HYBRID_SIGNALS)
-    if is_hybrid:
+    # Germany + Switzerland: all work modes allowed (DACH, user confirmed)
+    if any(k in combined for k in DACH_KW):
+        return True
+
+    # Non-DACH: reject if hybrid signals found
+    if any(k in combined for k in HYBRID_SIGNALS):
         return False
 
-    has_non_austria_city = any(k in combined for k in NON_AUSTRIA_KW)
-
-    # If job is anchored to a specific non-Austria city → exclude regardless of remote claims
-    if has_non_austria_city:
+    # If job is anchored to a specific non-DACH city → exclude unless fully remote
+    if any(k in combined for k in NON_AUSTRIA_KW):
         return False
 
-    # No specific city anchor — require strong fully-remote signal (REMOTE_KW is too loose;
-    # "home office" and "wfh" appear in on-site job perks)
-    has_fully_remote = any(k in combined for k in FULLY_REMOTE_KW)
-    if has_fully_remote:
+    # No specific city anchor — require strong fully-remote signal
+    if any(k in combined for k in FULLY_REMOTE_KW):
         return True
 
     return False
@@ -504,7 +527,9 @@ def _score_location(location: str, description: str) -> int:
         return 18
     if 'hybrid' in loc:
         return 15
-    if any(k in loc for k in ['germany', 'switzerland', 'netherlands', 'europe', ' eu ']):
+    if any(k in loc for k in DACH_KW):
+        return 15  # Germany/Switzerland explicit — same as hybrid Austria
+    if any(k in loc for k in ['netherlands', 'europe', ' eu ']):
         return 12
     return 5
 

@@ -489,30 +489,29 @@ FULLY_REMOTE_KW = ['fully remote', 'fully-remote', '100% remote', 'remote only',
 def _is_location_eligible(location: str, description: str) -> bool:
     """
     Hard location filter:
-    - DACH (Austria + Germany + Switzerland): all work modes eligible
-    - Rest of EU/world: FULLY remote only (no hybrid, no WFH partial)
+    - Austria (on-site, hybrid, remote): all work modes eligible
+    - Everywhere else: FULLY remote only (no hybrid, no partial)
+
+    IMPORTANT: Austria check uses location field only — NOT description.
+    Many global jobs mention Austrian/German cities in the description without being based there.
     """
     loc  = location.lower()
     desc = description[:800].lower()
     combined = loc + ' ' + desc
 
-    # Austria: all work modes allowed
-    if any(k in combined for k in AUSTRIA_KW):
+    # Austria: all work modes allowed (location field only)
+    if any(k in loc for k in AUSTRIA_KW):
         return True
 
-    # Germany + Switzerland: all work modes allowed (DACH, user confirmed)
-    if any(k in combined for k in DACH_KW):
-        return True
-
-    # Non-DACH: reject if hybrid signals found
+    # Non-Austria: reject hybrid immediately
     if any(k in combined for k in HYBRID_SIGNALS):
         return False
 
-    # If job is anchored to a specific non-DACH city → exclude unless fully remote
+    # If anchored to a specific non-Austria location → exclude
     if any(k in combined for k in NON_AUSTRIA_KW):
         return False
 
-    # No specific city anchor — require strong fully-remote signal
+    # No location anchor — require strong fully-remote signal
     if any(k in combined for k in FULLY_REMOTE_KW):
         return True
 
@@ -527,9 +526,7 @@ def _score_location(location: str, description: str) -> int:
         return 18
     if 'hybrid' in loc:
         return 15
-    if any(k in loc for k in DACH_KW):
-        return 15  # Germany/Switzerland explicit — same as hybrid Austria
-    if any(k in loc for k in ['netherlands', 'europe', ' eu ']):
+    if any(k in loc for k in ['europe', ' eu ']):
         return 12
     return 5
 

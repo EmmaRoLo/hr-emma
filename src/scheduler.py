@@ -33,7 +33,7 @@ def run_pipeline():
     print('\n[pipeline] --- Starting pipeline run ---')
 
     # 0. Clean up stale pending jobs (older than 24h) before scraping
-    expired = delete_old_pending(hours=24)
+    expired = delete_old_pending(hours=168)  # 7 days — give enough time to review
     if expired:
         print(f"[pipeline] Expired {expired} pending jobs older than 24h")
 

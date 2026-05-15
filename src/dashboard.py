@@ -199,6 +199,20 @@ def cleanup_pending():
     return jsonify({'ok': True, 'deleted': deleted})
 
 
+@app.route('/admin/run-pipeline', methods=['POST'])
+def trigger_pipeline():
+    """Manually trigger a full scrape → filter → save → notify pipeline run."""
+    secret = os.getenv('DASHBOARD_SECRET', '')
+    data = request.get_json(force=True)
+    if data.get('secret') != secret:
+        return jsonify({'ok': False, 'error': 'Unauthorized'}), 403
+    import threading
+    from src.scheduler import run_pipeline
+    t = threading.Thread(target=run_pipeline, daemon=True)
+    t.start()
+    return jsonify({'ok': True, 'message': 'Pipeline started in background'})
+
+
 @app.route('/admin/send-digest', methods=['POST'])
 def send_digest():
     """Manually trigger email digest for all pending jobs."""

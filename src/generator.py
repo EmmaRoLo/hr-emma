@@ -57,7 +57,7 @@ Your task: produce a tailored CV as JSON. Rules:
   * NO Oxford commas (no comma before "and" in a list)
   * NO over-formal connectors like "Furthermore", "Moreover", "Additionally"
   * Vary sentence structure — not every bullet should start the same way
-  * DO NOT mention visa, residency, work authorization or Austria eligibility anywhere in the CV content (it is already in the header)
+  * Work authorization is already in the Summary ("fully authorized to work across the EU without sponsorship") — do NOT repeat it elsewhere in the CV
 
 Return ONLY valid JSON, no markdown, no explanation:
 {
@@ -310,12 +310,6 @@ def _build_cv_docx(tailored: dict, job: dict) -> str:
         f"{PROFILE['address']}  |  {PROFILE['phone']}  |  {PROFILE['email']}  |  {PROFILE['linkedin']}"
     )
     _set_font(run, size=9, color=(107, 114, 128))
-
-    # Left: work authorization
-    auth_p = left_cell.add_paragraph()
-    auth_p.paragraph_format.space_after = Pt(4)
-    run = auth_p.add_run(PROFILE['work_authorization'])
-    _set_font(run, size=9, bold=True, color=(37, 99, 235))
 
     # Right: photo
     photo_p = right_cell.paragraphs[0]

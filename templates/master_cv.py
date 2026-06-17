@@ -11,18 +11,20 @@ PROFILE = {
     "phone": "+43 66021 64853",
     "email": "emmanuel.rdrlp@gmail.com",
     "linkedin": "https://www.linkedin.com/in/emmanuel-rdrlp/",
-    "work_authorization": "Legal resident and fully authorized to work in Austria. Open to relocation across the DACH region and EU.",
+    "work_authorization": "EU authorized · No sponsorship required · Open to relocation: DACH, CEE, wider EU",
 }
 
 SUMMARY = (
     "Strategy, Insights and Business Transformation Leader with 10+ years of experience across "
-    "FMCG in LATAM. Started as a Market Analyst, grew into regional Insights leadership across "
+    "global FMCG. Started as a Market Analyst, grew into regional Insights leadership across "
     "8 markets, and currently lead a Global Commercial and Sales Transformation program at "
-    "PepsiCo, redesigning operating models at scale across anchor markets. Throughout this path "
-    "I have moved progressively from producing insight to owning strategy, and from advising "
-    "decisions to driving the organizational change behind them. Led regional teams of 12+ "
-    "professionals, supported $500M+ revenue planning cycles, and designed operating models "
-    "that cut structural complexity by around 30%."
+    "PepsiCo, redesigning operating models at scale across anchor markets in the Americas, Asia "
+    "and Europe. Throughout this path I have moved progressively from producing insight to owning "
+    "strategy, and from advising decisions to driving the organizational change behind them. Led "
+    "regional teams of 12+ professionals, supported $500M+ revenue planning cycles, and designed "
+    "operating models that cut structural complexity by around 30%. Based in Vienna, fully "
+    "authorized to work across the EU without sponsorship, and open to relocation across DACH, "
+    "CEE and the wider EU."
 )
 
 CORE_COMPETENCIES = [

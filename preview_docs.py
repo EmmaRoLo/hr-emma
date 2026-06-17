@@ -171,7 +171,6 @@ def build_cv():
     lp_add('')
     lp_add('Lilienthalgasse 3, 1030 Wien, Austria',  size=10)
     lp_add('+43 66021 64853  |  emmanuel.rdrlp@gmail.com', size=10)
-    lp_add(PROFILE['work_authorization'], size=9, bold=True, color=RGBColor(0x16, 0x6A, 0x3A))
 
     # Right: Photo
     rp = right_cell.paragraphs[0]

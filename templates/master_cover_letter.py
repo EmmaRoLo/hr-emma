@@ -25,7 +25,7 @@ STRUCTURE = {
     "opening": (
         "I am writing to express my strong interest in the [ROLE] position at [COMPANY]. "
         "With 10+ years of experience driving commercial strategy, consumer insights, and "
-        "organizational transformation across FMCG / CPG in LATAM, I am confident I can "
+        "organizational transformation across global FMCG / CPG markets, I am confident I can "
         "deliver measurable impact from day one."
     ),
     "paragraph_2_template": (

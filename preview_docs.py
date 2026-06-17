@@ -44,8 +44,8 @@ SAMPLE_JOB = {
 # Shared "What I bring" bullets for motivation letters
 MOTIVATION_BULLETS = [
     'Analytical depth. I have worked inside Nielsen and Kantar, I know how the data is built, '
-    'where its limits are, and how to squeeze commercial signal out of it that most teams miss.',
-    'Commercial leadership. I have sat in AOP rooms, held P&L accountability at Walmart, and '
+    'where its limits are and how to squeeze commercial signal out of it that most teams miss.',
+    'Commercial leadership. I have sat in AOP rooms, held P&L accountability at Walmart and '
     'built category frameworks that directly shaped $500M+ planning cycles.',
     'Organizational impact. At PepsiCo I managed teams of 12 across 8 countries and I am '
     'currently designing the operating model that determines how commercial capabilities '
@@ -313,7 +313,7 @@ def build_cover_letter():
     ap(
         f"At PepsiCo LATAM, I led the Consumer and Market Insights function for a business of "
         f"roughly $2 billion in annual revenue. The work went well beyond reporting: I built the "
-        f"analytics architecture from the ground up, cutting time-to-insight by 40%, and sat in "
+        f"analytics architecture from the ground up, cutting time-to-insight by 40% and sat in "
         f"the room where annual operating plan decisions were made. Before that, as Analytics Manager "
         f"I ran a team of 12 across 8 countries, standardizing how the region read the market. "
         f"In my current role in Business Transformation, I design the commercial operating models "
@@ -379,17 +379,17 @@ def build_master_cover_letter():
     ap(
         "The [Position Title] role at [Company Name] sits at the intersection of where my "
         "career has been heading for the past decade: turning consumer and market data into "
-        "commercial strategy, and now into the operating models that make that strategy "
+        "commercial strategy and now into the operating models that make that strategy "
         "executable at scale.",
         size=11, space_after=10
     )
 
     ap(
         "Over 10+ years across FMCG - Nielsen, Kantar, Walmart and PepsiCo - I have moved from "
-        "producing market insight to owning the strategy built on it, and now to leading the "
+        "producing market insight to owning the strategy built on it and now to leading the "
         "organizational change behind it. As Analytics & Insights Manager and later SR Manager, "
         "Market & Consumer Insights at PepsiCo, I led regional teams of 12+ professionals, "
-        "supported $500M+ annual planning cycles, and cut time-to-insight by 40%. In my current "
+        "supported $500M+ annual planning cycles and cut time-to-insight by 40%. In my current "
         "role as Business Transformation Lead, Commercial & Sales at PepsiCo Global, I am "
         "redesigning operating models across anchor markets, reducing operational complexity by "
         "around 30% while coordinating 150+ stakeholders across Commercial, Sales, Finance and "
@@ -493,7 +493,7 @@ def build_motivation_letter():
         'Weeks 5 to 8: identify the two or three insight gaps creating the most commercial risk '
         'and propose fast, practical solutions that do not require a 6-month project.',
         'Weeks 9 to 12: present a 12-month insights capability roadmap to leadership '
-        'with clear owners, milestones, and business cases.',
+        'with clear owners, milestones and business cases.',
     ]
     for d in days:
         add_bullet(doc, d, indent_cm=0.5)
@@ -546,14 +546,14 @@ def build_generic_cover_letter():
         "I am a Commercial and Insights Leader with 10+ years of experience in global FMCG, "
         "combining analytical depth with the operational and leadership skills to turn strategy "
         "into execution. My career has progressed from Market Analyst to regional Insights "
-        "Leadership across 8 markets to Global Business Transformation at PepsiCo — always at "
+        "Leadership across 8 markets to Global Business Transformation at PepsiCo. I work at "
         "the intersection of data, commercial decisions and organizational change.",
         size=11, space_after=10
     )
 
     ap(
         "Across 10+ years at Nielsen, Kantar, Walmart and PepsiCo, I have led regional teams of "
-        "12+ professionals, supported $500M+ annual planning cycles, and cut time-to-insight by "
+        "12+ professionals, supported $500M+ annual planning cycles and cut time-to-insight by "
         "40%. In my current role as Business Transformation Lead, Commercial & Sales at PepsiCo "
         "Global, I am redesigning operating models across anchor markets, reducing operational "
         "complexity by around 30% while coordinating 150+ stakeholders across Commercial, Sales, "
@@ -564,7 +564,7 @@ def build_generic_cover_letter():
     ap(
         "Based in Vienna and completing an MBA in Advanced Technologies & Global Leadership at "
         "TU Wien, my current mandate already spans anchor markets across the Americas, Asia and "
-        "Europe, and I am looking for an organization where that global commercial and "
+        "Europe. I am looking for an organization where that global commercial and "
         "transformation experience, paired with deep analytical foundations, can create value "
         "quickly.",
         size=11, space_after=10
@@ -651,8 +651,8 @@ def build_master_motivation_letter():
     # Section 4: First 90 days
     ap('First 90 days', size=11, bold=True, color=NAVY, space_after=4)
     days = [
-        'Weeks 1 to 4: map the current operating model, data and decision-making landscape, '
-        'and identify which decisions are being made without the right information or structure.',
+        'Weeks 1 to 4: map the current operating model, data and decision-making landscape. '
+        'Identify which decisions are being made without the right information or structure.',
         'Weeks 5 to 8: identify the two or three highest-impact opportunities and build the '
         'business case and quick wins around them.',
         'Weeks 9 to 12: present a roadmap to leadership with clear owners, milestones and '
@@ -712,7 +712,7 @@ def build_generic_motivation_letter():
         "design the operating models that turn strategy into execution. The organizations that "
         "win in FMCG and consumer-facing industries are the ones that treat insight and operating "
         "discipline as competitive weapons, not reporting obligations. That is the standard I "
-        "hold myself to, and the kind of environment I am looking to join next.",
+        "hold myself to. That is the kind of environment I am looking to join next.",
         size=11, space_after=10
     )
 

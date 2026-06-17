@@ -17,11 +17,11 @@ PROFILE = {
 SUMMARY = (
     "Strategy, Insights and Business Transformation Leader with 10+ years of experience across "
     "global FMCG. Started as a Market Analyst, grew into regional Insights leadership across "
-    "8 markets, and currently lead a Global Commercial and Sales Transformation program at "
+    "8 markets and currently lead a Global Commercial and Sales Transformation program at "
     "PepsiCo, redesigning operating models at scale across anchor markets in the Americas, Asia "
     "and Europe. Throughout this path I have moved progressively from producing insight to owning "
-    "strategy, and from advising decisions to driving the organizational change behind them. Led "
-    "regional teams of 12+ professionals, supported $500M+ revenue planning cycles, and designed "
+    "strategy and from advising decisions to driving the organizational change behind them. Led "
+    "regional teams of 12+ professionals, supported $500M+ revenue planning cycles and designed "
     "operating models that cut structural complexity by around 30%. Based in Vienna with full "
     "Austrian work authorization and no sponsorship required; open to relocation across DACH "
     "and Central Europe."
@@ -150,21 +150,21 @@ EXPERIENCE = [
 
 EDUCATION = [
     {
-        "degree": "MBA — Advanced Technologies & Global Leadership",
+        "degree": "MBA -Advanced Technologies & Global Leadership",
         "institution": "TU Wien (Vienna University of Technology)",
         "location": "Vienna, Austria",
         "start": "Oct 2025",
         "end": "Expected 2027",
     },
     {
-        "degree": "Bachelor's Degree (SEP) — Marketing",
+        "degree": "Bachelor's Degree (SEP) -Marketing",
         "institution": "CENEVAL",
         "location": "Mexico",
         "start": "2026",
         "end": "2026",
     },
     {
-        "degree": "Bachelor — Trade Relationships",
+        "degree": "Bachelor -Trade Relationships",
         "institution": "Instituto Politécnico Nacional (IPN)",
         "location": "Mexico City, Mexico",
         "start": "Aug 2011",

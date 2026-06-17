@@ -129,6 +129,26 @@ SEARCH_CONFIGS = [
     {"keywords": "Business Transformation Director",    "location": "Switzerland", "remote": False},
     {"keywords": "Commercial Strategy Director",        "location": "Switzerland", "remote": False},
     {"keywords": "Marketing Director FMCG",             "location": "Switzerland", "remote": False},
+
+    # ══════════════════════════════════════════════════════════════════════
+    # CEE — BRATISLAVA / SLOVAKIA (60km from Vienna, strong regional HQ hub)
+    # ══════════════════════════════════════════════════════════════════════
+    {"keywords": "Consumer Insights Director Manager",  "location": "Bratislava", "remote": False},
+    {"keywords": "Head of Insights Analytics",          "location": "Bratislava", "remote": False},
+    {"keywords": "Business Transformation Director",    "location": "Bratislava", "remote": False},
+    {"keywords": "Commercial Strategy Director",        "location": "Bratislava", "remote": False},
+    {"keywords": "Analytics Manager Director",          "location": "Bratislava", "remote": False},
+    {"keywords": "Director Manager",                    "location": "Bratislava", "remote": False, "pages": 3},
+
+    # ══════════════════════════════════════════════════════════════════════
+    # CEE — POLAND / WARSAW (largest CEE FMCG market)
+    # ══════════════════════════════════════════════════════════════════════
+    {"keywords": "Consumer Insights Director",          "location": "Warsaw",     "remote": False},
+    {"keywords": "Head of Insights Analytics",          "location": "Warsaw",     "remote": False},
+    {"keywords": "Business Transformation Director",    "location": "Warsaw",     "remote": False},
+    {"keywords": "Commercial Strategy Director",        "location": "Warsaw",     "remote": False},
+    {"keywords": "Marketing Director FMCG",             "location": "Warsaw",     "remote": False},
+    {"keywords": "Analytics Director Manager",          "location": "Poland",     "remote": False},
 ]
 
 BASE_URL = "https://www.linkedin.com/jobs/search/"

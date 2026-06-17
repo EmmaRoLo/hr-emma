@@ -439,16 +439,23 @@ DACH_KW = [
     'bern', 'lausanne', 'basel', 'zug',
 ]
 
-# Countries/regions outside DACH where Emmanuel CANNOT work on-site
+# CEE: Bratislava (60km from Vienna) + Poland — eligible (user confirmed)
+CEE_KW = [
+    'bratislava', 'slovakia', 'slovak republic',
+    'poland', 'polska', 'warsaw', 'warszawa', 'krakow', 'kraków',
+    'wroclaw', 'wrocław', 'poznan', 'poznań', 'gdansk', 'gdańsk',
+]
+
+# Countries/regions outside DACH/CEE where Emmanuel CANNOT work on-site
 NON_AUSTRIA_KW = [
-    # Europe (Germany + Switzerland removed — now in DACH_KW)
+    # Europe (Germany + Switzerland moved to DACH_KW; Slovakia + Poland moved to CEE_KW)
     'united kingdom', ' uk ', 'england', 'london', 'manchester', 'birmingham',
     'france', 'paris', 'netherlands', 'amsterdam', 'spain', 'madrid', 'barcelona',
     'italy', 'milan', 'rome',
-    'poland', 'warsaw', 'czech', 'prague', 'hungary', 'budapest',
+    'czech', 'prague', 'hungary', 'budapest',
     'sweden', 'stockholm', 'denmark', 'copenhagen', 'norway', 'oslo',
     'finland', 'helsinki', 'belgium', 'brussels', 'portugal', 'lisbon',
-    'ireland', 'dublin', 'romania', 'bucharest', 'croatia', 'slovakia',
+    'ireland', 'dublin', 'romania', 'bucharest', 'croatia',
     # Americas
     'united states', ' usa', 'canada', 'toronto', 'vancouver',
     'new york', 'boston', 'chicago', 'san francisco', 'los angeles',
@@ -505,6 +512,10 @@ def _is_location_eligible(location: str, description: str) -> bool:
 
     # DACH (Germany & Switzerland): all work modes allowed (location field only)
     if any(k in loc for k in DACH_KW):
+        return True
+
+    # CEE (Bratislava + Poland): all work modes allowed (location field only)
+    if any(k in loc for k in CEE_KW):
         return True
 
     # Non-Austria: reject hybrid immediately

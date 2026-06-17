@@ -15,7 +15,7 @@ HEADER = {
 SHORT_VERSION = (
     "Commercial & Insights Leader with 10+ years in FMCG (PepsiCo, Nielsen, Kantar). "
     "Expert in consumer insights, advanced analytics and commercial strategy. "
-    "Based in Austria with full local work authorization; open to relocation across DACH/EU. "
+    "Based in Vienna with full Austrian work authorization, no sponsorship required. "
     "Eager to bring measurable impact to [COMPANY]."
 )
 
@@ -39,9 +39,9 @@ STRUCTURE = {
         "Show you did your research.]"
     ),
     "austria_paragraph": (
-        "I currently hold legal residence in Austria, with full authorization to work locally "
-        "and no sponsorship required, and I am open to relocating across the DACH region or "
-        "wider EU for the right opportunity."
+        "I currently hold legal residence in Austria with full authorization to work locally "
+        "and no sponsorship required. I am open to discussing relocation and remote arrangements "
+        "across DACH and Central Europe for the right opportunity."
     ),
     "closing": (
         "I would welcome the opportunity to discuss how my background in [KEY_AREA] can "

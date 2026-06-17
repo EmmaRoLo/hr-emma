@@ -11,7 +11,7 @@ PROFILE = {
     "phone": "+43 66021 64853",
     "email": "emmanuel.rdrlp@gmail.com",
     "linkedin": "https://www.linkedin.com/in/emmanuel-rdrlp/",
-    "work_authorization": "EU authorized · No sponsorship required · Open to relocation: DACH, CEE, wider EU",
+    "work_authorization": "Austrian residence permit (Familienangehöriger) · Fully authorized to work in Austria · No sponsorship required",
 }
 
 SUMMARY = (
@@ -22,9 +22,9 @@ SUMMARY = (
     "and Europe. Throughout this path I have moved progressively from producing insight to owning "
     "strategy, and from advising decisions to driving the organizational change behind them. Led "
     "regional teams of 12+ professionals, supported $500M+ revenue planning cycles, and designed "
-    "operating models that cut structural complexity by around 30%. Based in Vienna, fully "
-    "authorized to work across the EU without sponsorship, and open to relocation across DACH, "
-    "CEE and the wider EU."
+    "operating models that cut structural complexity by around 30%. Based in Vienna with full "
+    "Austrian work authorization and no sponsorship required; open to relocation across DACH "
+    "and Central Europe."
 )
 
 CORE_COMPETENCIES = [

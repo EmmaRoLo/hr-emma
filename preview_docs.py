@@ -540,15 +540,14 @@ def build_generic_cover_letter():
     ap(f"{PROFILE['email']}  /  {PROFILE['phone']}  /  linkedin.com/in/emmanuel-rdrlp/",
        size=10, color=GRAY, space_after=16)
 
-    ap(datetime.now().strftime('%B %d, %Y'), size=11, space_after=14)
-
     ap('Dear Hiring Manager,', size=11, space_after=10)
 
     ap(
-        "I am reaching out to explore opportunities in Corporate Strategy, Business "
-        "Transformation, and Commercial & Insights Leadership within FMCG and consumer-facing "
-        "organizations. My career has moved from producing market insight, to owning the "
-        "strategy built on it, to leading the organizational change behind it.",
+        "I am a Commercial and Insights Leader with 10+ years of experience in global FMCG, "
+        "combining analytical depth with the operational and leadership skills to turn strategy "
+        "into execution. My career has progressed from Market Analyst to regional Insights "
+        "Leadership across 8 markets to Global Business Transformation at PepsiCo — always at "
+        "the intersection of data, commercial decisions and organizational change.",
         size=11, space_after=10
     )
 
@@ -700,7 +699,6 @@ def build_generic_motivation_letter():
     ap('Emmanuel Rodriguez', size=16, bold=True, color=NAVY, space_after=2)
     ap(PROFILE['address'], size=10, color=GRAY, space_after=1)
     ap(f"{PROFILE['email']}  /  {PROFILE['phone']}", size=10, color=GRAY, space_after=16)
-    ap(datetime.now().strftime('%B %d, %Y'), size=11, space_after=14)
     ap('Motivation Letter', size=12, bold=True, color=NAVY, space_after=16)
     ap('Dear Hiring Team,', size=11, space_after=10)
 
@@ -710,7 +708,7 @@ def build_generic_motivation_letter():
         "My career sits at the intersection of consumer data and commercial decisions. I started "
         "as a market analyst at Nielsen reading FMCG shelf data, moved to Kantar running custom "
         "research for category teams, then spent six years at PepsiCo scaling the insights "
-        "function across Latin America before moving into Business Transformation, where I now "
+        "function across anchor markets before moving into Business Transformation, where I now "
         "design the operating models that turn strategy into execution. The organizations that "
         "win in FMCG and consumer-facing industries are the ones that treat insight and operating "
         "discipline as competitive weapons, not reporting obligations. That is the standard I "

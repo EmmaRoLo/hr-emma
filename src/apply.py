@@ -35,7 +35,7 @@ APPLICANT = {
     'first_name': 'Emmanuel',
     'last_name': 'Rodríguez',
     'email': 'emmanuel.rdrlp@gmail.com',
-    'city': 'Groß Gerungs',
+    'city': 'Wien',
     'country': 'Austria',
     'salary_expectation': '110000',
     'years_experience': '10',
@@ -45,7 +45,7 @@ APPLICANT = {
     'cover_letter': (
         "Commercial & Insights Leader with 10+ years in FMCG (PepsiCo, Nielsen, Kantar). "
         "Expert in consumer insights, advanced analytics, and commercial strategy. "
-        "Based in Austria with full EU work authorization."
+        "Based in Austria with full local work authorization; open to relocation across DACH/EU."
     ),
 }
 

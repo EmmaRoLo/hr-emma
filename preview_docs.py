@@ -20,8 +20,9 @@ from docx.oxml import OxmlElement
 from docx.shared import Pt, RGBColor, Cm
 
 from templates.master_cv import (
-    CORE_COMPETENCIES, EXPERIENCE, EDUCATION, LANGUAGES, SOFTWARE
+    CORE_COMPETENCIES, EXPERIENCE, EDUCATION, LANGUAGES, SOFTWARE, PROFILE, SUMMARY
 )
+from templates.master_cover_letter import STRUCTURE
 
 OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'output')
 PHOTO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'photo.jpg')
@@ -39,6 +40,17 @@ SAMPLE_JOB = {
     'location': 'Vienna, Austria',
     'url': 'https://linkedin.com/jobs/view/sample',
 }
+
+# Shared "What I bring" bullets for motivation letters
+MOTIVATION_BULLETS = [
+    'Analytical depth. I have worked inside Nielsen and Kantar, I know how the data is built, '
+    'where its limits are, and how to squeeze commercial signal out of it that most teams miss.',
+    'Commercial leadership. I have sat in AOP rooms, held P&L accountability at Walmart, and '
+    'built category frameworks that directly shaped $500M+ planning cycles.',
+    'Organizational impact. At PepsiCo I managed teams of 12 across 8 countries and I am '
+    'currently designing the operating model that determines how commercial capabilities '
+    'are delivered across anchor markets globally. I know how to move organizations.',
+]
 
 
 # ─────────────────────────────────────────
@@ -157,10 +169,9 @@ def build_cv():
     lp_add('Commercial and Insights Leader  |  Business Transformation  |  FMCG / CPG',
            size=10.5, bold=False, color=GRAY)
     lp_add('')
-    lp_add('Harruck 8, 3920 Gross Gerungs, Austria',  size=10)
+    lp_add('Lilienthalgasse 3, 1030 Wien, Austria',  size=10)
     lp_add('+43 66021 64853  |  emmanuel.rdrlp@gmail.com', size=10)
-    lp_add('linkedin.com/in/emmanuel-rdrlp/', size=10)
-    lp_add('Full EU resident and work authorized in Austria', size=10, bold=True, color=RGBColor(0x16, 0x6A, 0x3A))
+    lp_add(PROFILE['work_authorization'], size=9, bold=True, color=RGBColor(0x16, 0x6A, 0x3A))
 
     # Right: Photo
     rp = right_cell.paragraphs[0]
@@ -179,13 +190,7 @@ def build_cv():
     add_section_header(doc, 'Professional Summary')
     sp = doc.add_paragraph()
     sp.paragraph_format.space_after = Pt(4)
-    r = sp.add_run(
-        'Commercial and Insights Leader with 10 years of experience driving revenue growth, '
-        'category strategy, and organizational transformation across FMCG and CPG in LATAM. '
-        'Currently leading Business Transformation at PepsiCo, designing operating models for '
-        'scale across 8 markets. MBA candidate at TU Wien, Austria. '
-        'Full legal resident with EU work authorization.'
-    )
+    r = sp.add_run(SUMMARY)
     af(r, size=10.5)
 
     # ── SKILLS ──
@@ -194,7 +199,8 @@ def build_cv():
         CORE_COMPETENCIES[0:4],
         CORE_COMPETENCIES[4:8],
         CORE_COMPETENCIES[8:12],
-        CORE_COMPETENCIES[12:15],
+        CORE_COMPETENCIES[12:16],
+        CORE_COMPETENCIES[16:20],
     ]
     for row in skill_rows:
         if row:
@@ -207,7 +213,7 @@ def build_cv():
     # ── PROFESSIONAL EXPERIENCE ──
     add_section_header(doc, 'Professional Experience')
 
-    for exp in EXPERIENCE[:6]:
+    for exp in EXPERIENCE:
         # Role title / Company / Location / Dates
         p = doc.add_paragraph()
         p.paragraph_format.space_before = Pt(8)
@@ -238,7 +244,8 @@ def build_cv():
         af(r1, size=10.5, bold=True, color=BLACK)
         r2 = ep.add_run(f"  /  {edu['institution']}, {edu['location']}")
         af(r2, size=10.5, color=GRAY)
-        r3 = ep.add_run(f"  ({edu['start']} - {edu['end']})")
+        date_range = edu['end'] if edu['start'] == edu['end'] else f"{edu['start']} - {edu['end']}"
+        r3 = ep.add_run(f"  ({date_range})")
         af(r3, size=10, italic=True, color=LGRAY)
 
     # ── LANGUAGES ──
@@ -280,7 +287,7 @@ def build_cover_letter():
 
     # Header
     ap('Emmanuel Rodriguez', size=16, bold=True, color=NAVY, space_after=2)
-    ap('Harruck 8, 3920 Gross Gerungs, Austria', size=10, color=GRAY, space_after=1)
+    ap('Lilienthalgasse 3, 1030 Wien, Austria', size=10, color=GRAY, space_after=1)
     ap('emmanuel.rdrlp@gmail.com  /  +43 66021 64853  /  linkedin.com/in/emmanuel-rdrlp/',
        size=10, color=GRAY, space_after=16)
 
@@ -325,10 +332,7 @@ def build_cover_letter():
     )
 
     # Work auth - short, factual
-    ap(
-        'I am a full legal resident of Austria with no sponsorship requirement.',
-        size=11, space_after=10
-    )
+    ap(STRUCTURE['austria_paragraph'], size=11, space_after=10)
 
     # Closing - direct
     ap(
@@ -342,6 +346,81 @@ def build_cover_letter():
     path = os.path.join(OUTPUT_DIR, 'CoverLetter_Emmanuel_Rodriguez_v2.docx')
     doc.save(path)
     print(f'[OK] Cover Letter saved: {path}')
+    return path
+
+
+def build_master_cover_letter():
+    """Standalone, general-purpose cover letter (counterpart to the Master CV).
+    Fill in [Position Title] and [Company Name] before sending."""
+    doc = Document()
+    set_margins(doc, top=Cm(2.5), bottom=Cm(2.5), left=Cm(2.8), right=Cm(2.8))
+
+    def ap(text, size=11, bold=False, color=None, space_after=8, space_before=0, align=None):
+        p = doc.add_paragraph()
+        p.paragraph_format.space_after  = Pt(space_after)
+        p.paragraph_format.space_before = Pt(space_before)
+        if align:
+            p.alignment = align
+        r = p.add_run(text)
+        af(r, size=size, bold=bold, color=color or BLACK)
+        return p
+
+    # Header
+    ap('Emmanuel Rodriguez', size=16, bold=True, color=NAVY, space_after=2)
+    ap(PROFILE['address'], size=10, color=GRAY, space_after=1)
+    ap(f"{PROFILE['email']}  /  {PROFILE['phone']}  /  linkedin.com/in/emmanuel-rdrlp/",
+       size=10, color=GRAY, space_after=16)
+
+    ap(datetime.now().strftime('%B %d, %Y'), size=11, space_after=14)
+
+    ap('Re: [Position Title] - [Company Name]', size=11, bold=True, color=NAVY, space_after=14)
+
+    ap('Dear Hiring Manager,', size=11, space_after=10)
+
+    ap(
+        "The [Position Title] role at [Company Name] sits at the intersection of where my "
+        "career has been heading for the past decade: turning consumer and market data into "
+        "commercial strategy, and now into the operating models that make that strategy "
+        "executable at scale.",
+        size=11, space_after=10
+    )
+
+    ap(
+        "Over 10+ years across FMCG - Nielsen, Kantar, Walmart and PepsiCo - I have moved from "
+        "producing market insight to owning the strategy built on it, and now to leading the "
+        "organizational change behind it. As Analytics & Insights Manager and later SR Manager, "
+        "Market & Consumer Insights at PepsiCo, I led regional teams of 12+ professionals, "
+        "supported $500M+ annual planning cycles, and cut time-to-insight by 40%. In my current "
+        "role as Business Transformation Lead, Commercial & Sales at PepsiCo Global, I am "
+        "redesigning operating models across anchor markets, reducing operational complexity by "
+        "around 30% while coordinating 150+ stakeholders across Commercial, Sales, Finance and "
+        "Capabilities.",
+        size=11, space_after=10
+    )
+
+    ap(
+        "Based in Vienna and completing an MBA in Advanced Technologies & Global Leadership at "
+        "TU Wien, my current mandate already spans anchor markets across the Americas, Asia and "
+        "Europe - and [Company Name]'s position in [industry / market] is exactly the kind of "
+        "environment where that global commercial and transformation experience creates value "
+        "quickly.",
+        size=11, space_after=10
+    )
+
+    ap(STRUCTURE['austria_paragraph'], size=11, space_after=10)
+
+    ap(
+        "I would welcome the opportunity to discuss how this experience can contribute to "
+        "[Company Name]'s goals. Thank you for your time and consideration.",
+        size=11, space_after=20
+    )
+
+    ap('Kind regards,', size=11, space_after=4)
+    ap('Emmanuel Rodriguez', size=11, bold=True, space_after=2)
+
+    path = os.path.join(OUTPUT_DIR, 'Master_Cover_Letter_Emmanuel_Rodriguez.docx')
+    doc.save(path)
+    print(f'[OK] Master Cover Letter saved: {path}')
     return path
 
 
@@ -363,7 +442,7 @@ def build_motivation_letter():
 
     # Header
     ap('Emmanuel Rodriguez', size=16, bold=True, color=NAVY, space_after=2)
-    ap('Harruck 8, 3920 Gross Gerungs, Austria', size=10, color=GRAY, space_after=1)
+    ap('Lilienthalgasse 3, 1030 Wien, Austria', size=10, color=GRAY, space_after=1)
     ap('emmanuel.rdrlp@gmail.com  /  +43 66021 64853', size=10, color=GRAY, space_after=16)
     ap(datetime.now().strftime('%B %d, %Y'), size=11, space_after=14)
     ap(f"Motivation Letter\n{SAMPLE_JOB['title']}  /  {SAMPLE_JOB['company']}",
@@ -390,16 +469,7 @@ def build_motivation_letter():
         'Three capabilities set my profile apart for this role:',
         size=11, space_after=4
     )
-    bullets = [
-        'Analytical depth. I have worked inside Nielsen and Kantar, I know how the data is built, '
-        'where its limits are, and how to squeeze commercial signal out of it that most teams miss.',
-        'Commercial leadership. I have sat in AOP rooms, held P&L accountability at Walmart, and '
-        'built category frameworks that directly shaped $500M+ planning cycles.',
-        'Organizational impact. At PepsiCo I managed teams of 12 across 8 countries and I am '
-        'currently designing the operating model that determines how commercial capabilities '
-        'are delivered across all of LATAM. I know how to move organizations.',
-    ]
-    for b in bullets:
+    for b in MOTIVATION_BULLETS:
         add_bullet(doc, b, indent_cm=0.5)
 
     doc.add_paragraph().paragraph_format.space_after = Pt(6)
@@ -411,10 +481,10 @@ def build_motivation_letter():
         f"focused on how European business models differ from the high-growth emerging markets "
         f"where I built my career. {SAMPLE_JOB['company']}'s presence in the Austrian market and "
         f"its reputation for category discipline make it the right company to apply what I know "
-        f"and learn what I do not yet know about European consumer behavior. "
-        f"I am a full legal resident with no visa or sponsorship requirement.",
+        f"and learn what I do not yet know about European consumer behavior.",
         size=11, space_after=10
     )
+    ap(STRUCTURE['austria_paragraph'], size=11, space_after=10)
 
     # Section 4: First 90 days - concrete, not generic
     ap('First 90 days', size=11, bold=True, color=NAVY, space_after=4)
@@ -445,11 +515,264 @@ def build_motivation_letter():
     return path
 
 
+# ─────────────────────────────────────────
+# 4. GENERIC COVER LETTER (no placeholders)
+# ─────────────────────────────────────────
+
+def build_generic_cover_letter():
+    """Standalone, fully self-contained cover letter for general/networking use.
+    No [Position Title] / [Company Name] placeholders."""
+    doc = Document()
+    set_margins(doc, top=Cm(2.5), bottom=Cm(2.5), left=Cm(2.8), right=Cm(2.8))
+
+    def ap(text, size=11, bold=False, color=None, space_after=8, space_before=0, align=None):
+        p = doc.add_paragraph()
+        p.paragraph_format.space_after  = Pt(space_after)
+        p.paragraph_format.space_before = Pt(space_before)
+        if align:
+            p.alignment = align
+        r = p.add_run(text)
+        af(r, size=size, bold=bold, color=color or BLACK)
+        return p
+
+    # Header
+    ap('Emmanuel Rodriguez', size=16, bold=True, color=NAVY, space_after=2)
+    ap(PROFILE['address'], size=10, color=GRAY, space_after=1)
+    ap(f"{PROFILE['email']}  /  {PROFILE['phone']}  /  linkedin.com/in/emmanuel-rdrlp/",
+       size=10, color=GRAY, space_after=16)
+
+    ap(datetime.now().strftime('%B %d, %Y'), size=11, space_after=14)
+
+    ap('Dear Hiring Manager,', size=11, space_after=10)
+
+    ap(
+        "I am reaching out to explore opportunities in Corporate Strategy, Business "
+        "Transformation, and Commercial & Insights Leadership within FMCG and consumer-facing "
+        "organizations. My career has moved from producing market insight, to owning the "
+        "strategy built on it, to leading the organizational change behind it.",
+        size=11, space_after=10
+    )
+
+    ap(
+        "Across 10+ years at Nielsen, Kantar, Walmart and PepsiCo, I have led regional teams of "
+        "12+ professionals, supported $500M+ annual planning cycles, and cut time-to-insight by "
+        "40%. In my current role as Business Transformation Lead, Commercial & Sales at PepsiCo "
+        "Global, I am redesigning operating models across anchor markets, reducing operational "
+        "complexity by around 30% while coordinating 150+ stakeholders across Commercial, Sales, "
+        "Finance and Capabilities.",
+        size=11, space_after=10
+    )
+
+    ap(
+        "Based in Vienna and completing an MBA in Advanced Technologies & Global Leadership at "
+        "TU Wien, my current mandate already spans anchor markets across the Americas, Asia and "
+        "Europe, and I am looking for an organization where that global commercial and "
+        "transformation experience, paired with deep analytical foundations, can create value "
+        "quickly.",
+        size=11, space_after=10
+    )
+
+    ap(STRUCTURE['austria_paragraph'], size=11, space_after=10)
+
+    ap(
+        "I would welcome the opportunity to discuss how my background could support your team's "
+        "goals. Thank you for your time and consideration.",
+        size=11, space_after=20
+    )
+
+    ap('Kind regards,', size=11, space_after=4)
+    ap('Emmanuel Rodriguez', size=11, bold=True, space_after=2)
+
+    path = os.path.join(OUTPUT_DIR, 'Generic_Cover_Letter_Emmanuel_Rodriguez.docx')
+    doc.save(path)
+    print(f'[OK] Generic Cover Letter saved: {path}')
+    return path
+
+
+# ─────────────────────────────────────────
+# 5. MASTER MOTIVATION LETTER (with placeholders)
+# ─────────────────────────────────────────
+
+def build_master_motivation_letter():
+    """Standalone motivation letter template (counterpart to the Master Cover Letter).
+    Fill in [Position Title] and [Company Name] before sending."""
+    doc = Document()
+    set_margins(doc, top=Cm(2.5), bottom=Cm(2.5), left=Cm(2.8), right=Cm(2.8))
+
+    def ap(text, size=11, bold=False, color=None, space_after=8, space_before=0):
+        p = doc.add_paragraph()
+        p.paragraph_format.space_after  = Pt(space_after)
+        p.paragraph_format.space_before = Pt(space_before)
+        r = p.add_run(text)
+        af(r, size=size, bold=bold, color=color or BLACK)
+        return p
+
+    # Header
+    ap('Emmanuel Rodriguez', size=16, bold=True, color=NAVY, space_after=2)
+    ap(PROFILE['address'], size=10, color=GRAY, space_after=1)
+    ap(f"{PROFILE['email']}  /  {PROFILE['phone']}", size=10, color=GRAY, space_after=16)
+    ap(datetime.now().strftime('%B %d, %Y'), size=11, space_after=14)
+    ap('Motivation Letter\n[Position Title]  /  [Company Name]',
+       size=12, bold=True, color=NAVY, space_after=16)
+    ap('Dear Hiring Team,', size=11, space_after=10)
+
+    # Section 1: Why this role
+    ap('Why this role', size=11, bold=True, color=NAVY, space_after=4)
+    ap(
+        "The [Position Title] position at [Company Name] is the kind of role I have been "
+        "building toward. My career sits at the intersection of consumer data and commercial "
+        "decisions: I started as a market analyst at Nielsen reading FMCG shelf data, moved to "
+        "Kantar running custom research for category teams, then spent six years at PepsiCo "
+        "scaling the insights function across Latin America before moving into Business "
+        "Transformation, where I now design the operating models that turn strategy into "
+        "execution. [Company Name]'s position in [industry / market] is exactly the kind of "
+        "environment where this combination of insight, strategy and execution creates value.",
+        size=11, space_after=10
+    )
+
+    # Section 2: What I bring
+    ap('What I bring', size=11, bold=True, color=NAVY, space_after=4)
+    ap('Three capabilities set my profile apart for this role:', size=11, space_after=4)
+    for b in MOTIVATION_BULLETS:
+        add_bullet(doc, b, indent_cm=0.5)
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(6)
+
+    # Section 3: Why [Company Name] and why Austria
+    ap('Why [Company Name] and why Austria', size=11, bold=True, color=NAVY, space_after=4)
+    ap(
+        "I moved to Austria with a deliberate plan: completing my MBA in Advanced Technologies "
+        "& Global Leadership at TU Wien while based at the center of my current global mandate, "
+        "which already spans anchor markets across the Americas, Asia and Europe. [Company "
+        "Name]'s [reputation / position in industry] makes it a company where that global "
+        "commercial and transformation experience can create value from day one.",
+        size=11, space_after=10
+    )
+    ap(STRUCTURE['austria_paragraph'], size=11, space_after=10)
+
+    # Section 4: First 90 days
+    ap('First 90 days', size=11, bold=True, color=NAVY, space_after=4)
+    days = [
+        'Weeks 1 to 4: map the current operating model, data and decision-making landscape, '
+        'and identify which decisions are being made without the right information or structure.',
+        'Weeks 5 to 8: identify the two or three highest-impact opportunities and build the '
+        'business case and quick wins around them.',
+        'Weeks 9 to 12: present a roadmap to leadership with clear owners, milestones and '
+        'measurable outcomes.',
+    ]
+    for d in days:
+        add_bullet(doc, d, indent_cm=0.5)
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(10)
+
+    ap(
+        'Thank you for taking the time to review my application. '
+        'I look forward to the opportunity to speak.',
+        size=11, space_after=20
+    )
+    ap('Kind regards,', size=11, space_after=4)
+    ap('Emmanuel Rodriguez', size=11, bold=True)
+
+    path = os.path.join(OUTPUT_DIR, 'Master_Motivation_Letter_Emmanuel_Rodriguez.docx')
+    doc.save(path)
+    print(f'[OK] Master Motivation Letter saved: {path}')
+    return path
+
+
+# ─────────────────────────────────────────
+# 6. GENERIC MOTIVATION LETTER (no placeholders)
+# ─────────────────────────────────────────
+
+def build_generic_motivation_letter():
+    """Standalone, fully self-contained motivation letter for general/networking use.
+    No [Position Title] / [Company Name] placeholders."""
+    doc = Document()
+    set_margins(doc, top=Cm(2.5), bottom=Cm(2.5), left=Cm(2.8), right=Cm(2.8))
+
+    def ap(text, size=11, bold=False, color=None, space_after=8, space_before=0):
+        p = doc.add_paragraph()
+        p.paragraph_format.space_after  = Pt(space_after)
+        p.paragraph_format.space_before = Pt(space_before)
+        r = p.add_run(text)
+        af(r, size=size, bold=bold, color=color or BLACK)
+        return p
+
+    # Header
+    ap('Emmanuel Rodriguez', size=16, bold=True, color=NAVY, space_after=2)
+    ap(PROFILE['address'], size=10, color=GRAY, space_after=1)
+    ap(f"{PROFILE['email']}  /  {PROFILE['phone']}", size=10, color=GRAY, space_after=16)
+    ap(datetime.now().strftime('%B %d, %Y'), size=11, space_after=14)
+    ap('Motivation Letter', size=12, bold=True, color=NAVY, space_after=16)
+    ap('Dear Hiring Team,', size=11, space_after=10)
+
+    # Section 1: What drives me
+    ap('What drives me', size=11, bold=True, color=NAVY, space_after=4)
+    ap(
+        "My career sits at the intersection of consumer data and commercial decisions. I started "
+        "as a market analyst at Nielsen reading FMCG shelf data, moved to Kantar running custom "
+        "research for category teams, then spent six years at PepsiCo scaling the insights "
+        "function across Latin America before moving into Business Transformation, where I now "
+        "design the operating models that turn strategy into execution. The organizations that "
+        "win in FMCG and consumer-facing industries are the ones that treat insight and operating "
+        "discipline as competitive weapons, not reporting obligations. That is the standard I "
+        "hold myself to, and the kind of environment I am looking to join next.",
+        size=11, space_after=10
+    )
+
+    # Section 2: What I bring
+    ap('What I bring', size=11, bold=True, color=NAVY, space_after=4)
+    ap('Three capabilities set my profile apart:', size=11, space_after=4)
+    for b in MOTIVATION_BULLETS:
+        add_bullet(doc, b, indent_cm=0.5)
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(6)
+
+    # Section 3: Why Austria and Europe
+    ap('Why Austria and Europe', size=11, bold=True, color=NAVY, space_after=4)
+    ap(
+        "I moved to Austria with a deliberate plan: completing my MBA in Advanced Technologies "
+        "& Global Leadership at TU Wien while based at the center of my current global mandate, "
+        "which already spans anchor markets across the Americas, Asia and Europe. I am looking "
+        "to bring that global commercial and transformation experience into a European "
+        "organization where it can create value from day one.",
+        size=11, space_after=10
+    )
+    ap(STRUCTURE['austria_paragraph'], size=11, space_after=10)
+
+    # Section 4: How I work
+    ap('How I work', size=11, bold=True, color=NAVY, space_after=4)
+    ap(
+        "Regardless of the specific mandate, my approach follows the same pattern: understand "
+        "the current operating model and the decisions people are actually making, or struggling "
+        "to make, without the right information or structure; identify the two or three "
+        "opportunities that would create the most value fastest; and build a roadmap with clear "
+        "owners, milestones and business cases - not a deck that sits in a drawer.",
+        size=11, space_after=10
+    )
+
+    ap(
+        'Thank you for taking the time to review my application. '
+        'I look forward to the opportunity to speak.',
+        size=11, space_after=20
+    )
+    ap('Kind regards,', size=11, space_after=4)
+    ap('Emmanuel Rodriguez', size=11, bold=True)
+
+    path = os.path.join(OUTPUT_DIR, 'Generic_Motivation_Letter_Emmanuel_Rodriguez.docx')
+    doc.save(path)
+    print(f'[OK] Generic Motivation Letter saved: {path}')
+    return path
+
+
 if __name__ == '__main__':
     print('\nGenerating sample documents...\n')
-    cv  = build_cv()
-    cl  = build_cover_letter()
-    ml  = build_motivation_letter()
+    cv   = build_cv()
+    cl   = build_cover_letter()
+    ml   = build_motivation_letter()
+    mcl  = build_master_cover_letter()
+    gcl  = build_generic_cover_letter()
+    mml  = build_master_motivation_letter()
+    gml  = build_generic_motivation_letter()
     print(f'\nAll files saved to: {OUTPUT_DIR}')
 
     import subprocess

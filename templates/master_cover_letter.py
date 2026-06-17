@@ -5,7 +5,7 @@ The Claude API generator fills in [COMPANY], [ROLE], and tailors the body paragr
 
 HEADER = {
     "name": "Emmanuel Rodríguez",
-    "address": "Harruck 8, 3920 Groß Gerungs, Austria",
+    "address": "Lilienthalgasse 3, 1030 Wien, Austria",
     "phone": "+43 66021 64853",
     "email": "emmanuel.rdrlp@gmail.com",
     "linkedin": "https://www.linkedin.com/in/emmanuel-rdrlp/",
@@ -15,7 +15,7 @@ HEADER = {
 SHORT_VERSION = (
     "Commercial & Insights Leader with 10+ years in FMCG (PepsiCo, Nielsen, Kantar). "
     "Expert in consumer insights, advanced analytics and commercial strategy. "
-    "Based in Austria with full EU work authorization. "
+    "Based in Austria with full local work authorization; open to relocation across DACH/EU. "
     "Eager to bring measurable impact to [COMPANY]."
 )
 
@@ -39,8 +39,9 @@ STRUCTURE = {
         "Show you did your research.]"
     ),
     "austria_paragraph": (
-        "I currently hold legal residence in Austria, ensuring full eligibility to live and "
-        "work locally without any sponsorship requirement."
+        "I currently hold legal residence in Austria, with full authorization to work locally "
+        "and no sponsorship required, and I am open to relocating across the DACH region or "
+        "wider EU for the right opportunity."
     ),
     "closing": (
         "I would welcome the opportunity to discuss how my background in [KEY_AREA] can "

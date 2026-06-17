@@ -4,6 +4,7 @@ Runs on http://localhost:5050
 """
 
 import os
+import re
 import sys
 import threading
 
@@ -19,6 +20,10 @@ app.secret_key = os.getenv('DASHBOARD_SECRET', 'hr-emma-dev-secret')
 
 _apply_callback = None   # set by run.py to trigger apply.py
 _generate_callback = None  # set by run.py to trigger generator.py
+
+
+def _slugify(text: str) -> str:
+    return re.sub(r'[^a-z0-9]+', '_', text.lower()).strip('_')
 
 
 def register_callbacks(apply_fn, generate_fn):
@@ -110,17 +115,23 @@ def add_job_manual():
     from src.database import save_jobs
     from datetime import datetime
 
+    title   = data.get('title', '')
+    company = data.get('company', '')
+    if not title or not company:
+        return jsonify({'ok': False, 'error': 'title and company required'}), 400
+
+    # Deterministic ID from company+title when not provided, so re-adding the
+    # same job (e.g. a re-sent screenshot) updates the existing entry instead
+    # of creating a duplicate pending row.
     job = {
-        'id':          data.get('id') or f"manual_{int(datetime.utcnow().timestamp())}",
-        'title':       data.get('title', ''),
-        'company':     data.get('company', ''),
+        'id':          data.get('id') or f"manual_{_slugify(company)}_{_slugify(title)}",
+        'title':       title,
+        'company':     company,
         'location':    data.get('location', ''),
         'description': data.get('description', ''),
         'url':         data.get('url', ''),
         'found_at':    datetime.utcnow().isoformat(),
     }
-    if not job['title'] or not job['company']:
-        return jsonify({'ok': False, 'error': 'title and company required'}), 400
 
     score, lang, zone, tier, cl = score_job(job)
     job.update({'score': score, 'language': lang, 'zone': zone,
@@ -193,9 +204,9 @@ def refilter_pending():
 
 @app.route('/admin/cleanup-pending', methods=['POST'])
 def cleanup_pending():
-    """Delete pending jobs older than 24 hours."""
+    """Delete pending jobs older than 7 days."""
     from src.database import delete_old_pending
-    deleted = delete_old_pending(hours=24)
+    deleted = delete_old_pending(hours=168)
     return jsonify({'ok': True, 'deleted': deleted})
 
 

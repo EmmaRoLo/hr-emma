@@ -7,55 +7,59 @@ The Claude API generator selects and tailors from this data per job.
 PROFILE = {
     "name": "Emmanuel Rodríguez",
     "title": "Commercial & Insights Leader | Business Transformation | FMCG",
-    "address": "Harruck 8, 3920 Groß Gerungs, Austria",
+    "address": "Lilienthalgasse 3, 1030 Wien, Austria",
     "phone": "+43 66021 64853",
     "email": "emmanuel.rdrlp@gmail.com",
     "linkedin": "https://www.linkedin.com/in/emmanuel-rdrlp/",
-    "work_authorization": "Legal resident in Austria. Fully eligible to work in Austria and the EU.",
+    "work_authorization": "Legal resident and fully authorized to work in Austria. Open to relocation across the DACH region and EU.",
 }
 
 SUMMARY = (
-    "Commercial & Insights Leader with 10+ years driving revenue growth, category strategy "
-    "and organizational transformation across FMCG / CPG in LATAM. Expert in consumer insights, "
-    "advanced analytics and commercial excellence. Currently leading Business Transformation at "
-    "PepsiCo, designing operating models for scale. MBA candidate at TU Wien (Austria)."
+    "Strategy, Insights and Business Transformation Leader with 10+ years of experience across "
+    "FMCG in LATAM. Started as a Market Analyst, grew into regional Insights leadership across "
+    "8 markets, and currently lead a Global Commercial and Sales Transformation program at "
+    "PepsiCo, redesigning operating models at scale across anchor markets. Throughout this path "
+    "I have moved progressively from producing insight to owning strategy, and from advising "
+    "decisions to driving the organizational change behind them. Led regional teams of 12+ "
+    "professionals, supported $500M+ revenue planning cycles, and designed operating models "
+    "that cut structural complexity by around 30%."
 )
 
 CORE_COMPETENCIES = [
-    "Consumer Insights",
-    "Shopper Analytics",
-    "Category Management",
-    "Commercial Strategy",
-    "Market Intelligence",
+    "Corporate Strategy Development",
+    "Strategic Planning & Controlling",
     "Business Transformation",
     "Operating Model Design",
-    "P&L Management",
-    "Cross-functional Leadership",
+    "Scenario Analysis & Financial Modeling",
+    "Commercial Excellence",
+    "Category Management",
     "Annual Operating Plan (AOP)",
-    "Advanced Analytics",
-    "Power BI",
     "Nielsen RMS / Scan / TT",
     "Kantar Panel",
     "FMCG / CPG / Retail",
-    "Regional Leadership",
+    "Consumer & Shopper Analytics",
+    "Market Intelligence",
+    "Advanced Analytics",
+    "Power BI",
+    "Cross-functional Leadership",
     "Stakeholder Management",
+    "P&L Management",
     "Change Management",
-    "Strategic Planning",
-    "Campaign Management",
+    "Regional Leadership",
 ]
 
 EXPERIENCE = [
     {
         "title": "Business Transformation Lead, Commercial & Sales",
-        "company": "PepsiCo LATAM",
+        "company": "PepsiCo Global",
         "start": "Oct 2025",
         "end": "Present",
         "tags": ["transformation", "commercial", "strategy", "leadership", "operations"],
         "bullets": [
-            "Designed end-to-end Commercial & Sales capability transition across 8 LATAM markets, reducing operational complexity by ~30% and accelerating time-to-execution.",
+            "Designed end-to-end Commercial & Sales capability transition across anchor markets, reducing operational complexity by ~30% and accelerating time-to-execution.",
             "Defined governance frameworks and service delivery models in partnership with Global Capability Centers (GCC), ensuring disciplined transitions and measurable business impact.",
             "Orchestrated cross-functional alignment across Commercial, Sales, Finance and Capabilities (150+ stakeholders), enabling sustainable growth and long-term competitiveness.",
-            "Led large-scale transformation programs in close partnership with LATAM Commercial Leadership, ensuring disciplined execution and measurable outcomes.",
+            "Led large-scale transformation programs in close partnership with Global Commercial Leadership, ensuring disciplined execution and measurable outcomes.",
         ],
     },
     {
@@ -74,8 +78,8 @@ EXPERIENCE = [
     {
         "title": "Analytics & Insights Manager",
         "company": "PepsiCo LATAM Foods",
-        "start": "Jun 2021",
-        "end": "Dec 2022",
+        "start": "Jan 2023",
+        "end": "Dec 2023",
         "tags": ["analytics", "insights", "regional", "leadership", "fmcg"],
         "bullets": [
             "Standardized regional information architecture across 8 LATAM countries, ensuring consistent data access and reporting for all stakeholders.",
@@ -86,18 +90,18 @@ EXPERIENCE = [
     },
     {
         "title": "Associate Business Intelligence Manager",
-        "company": "PepsiCo México Savory Foods",
+        "company": "PepsiCo Mexico Savory Foods",
         "start": "Jun 2021",
         "end": "Dec 2022",
         "tags": ["analytics", "bi", "insights", "fmcg"],
         "bullets": [
-            "Managed business intelligence platforms and analytics delivery for México Savory Foods division.",
+            "Managed business intelligence platforms and analytics delivery for Mexico Savory Foods division.",
             "Designed dashboards and KPI frameworks used by commercial and marketing teams for decision-making.",
         ],
     },
     {
         "title": "Marketing Manager",
-        "company": "Walmart México",
+        "company": "Walmart Mexico",
         "start": "Dec 2019",
         "end": "Mar 2021",
         "tags": ["marketing", "shopper", "retail", "commercial", "campaign"],
@@ -136,7 +140,7 @@ EXPERIENCE = [
         "end": "Sep 2017",
         "tags": ["analytics", "market", "fmcg", "retail", "nielsen"],
         "bullets": [
-            "Delivered RMS / Scan / TT analysis for FMCG clients across México, supporting commercial and trade marketing decisions.",
+            "Delivered RMS / Scan / TT analysis for FMCG clients across Mexico, supporting commercial and trade marketing decisions.",
             "Prepared competitive landscape reports and market share tracking for key account teams.",
         ],
     },
@@ -151,9 +155,16 @@ EDUCATION = [
         "end": "Expected 2027",
     },
     {
+        "degree": "Bachelor's Degree (SEP) — Marketing",
+        "institution": "CENEVAL",
+        "location": "Mexico",
+        "start": "2026",
+        "end": "2026",
+    },
+    {
         "degree": "Bachelor — Trade Relationships",
         "institution": "Instituto Politécnico Nacional (IPN)",
-        "location": "Mexico City, México",
+        "location": "Mexico City, Mexico",
         "start": "Aug 2011",
         "end": "May 2015",
     },

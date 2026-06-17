@@ -40,18 +40,27 @@ def _ensure_dirs():
 
 def _to_pdf(docx_path: str) -> str:
     """Convert DOCX to PDF using LibreOffice. Falls back to DOCX copy if unavailable."""
-    try:
-        result = subprocess.run(
-            ['libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', CVS_DIR, docx_path],
-            capture_output=True, timeout=60
-        )
-        if result.returncode == 0:
-            pdf_name = os.path.splitext(os.path.basename(docx_path))[0] + '.pdf'
-            pdf_path = os.path.join(CVS_DIR, pdf_name)
-            if os.path.exists(pdf_path):
-                return pdf_path
-    except Exception:
-        pass
+    lo = shutil.which('libreoffice') or shutil.which('soffice')
+    if not lo:
+        for candidate in ['/usr/bin/libreoffice', '/usr/bin/soffice',
+                          '/usr/lib/libreoffice/program/soffice']:
+            if os.path.exists(candidate):
+                lo = candidate
+                break
+    if lo:
+        try:
+            env = {**os.environ, 'HOME': '/tmp'}
+            result = subprocess.run(
+                [lo, '--headless', '--norestore', '--convert-to', 'pdf', '--outdir', CVS_DIR, docx_path],
+                capture_output=True, timeout=60, env=env
+            )
+            if result.returncode == 0:
+                pdf_name = os.path.splitext(os.path.basename(docx_path))[0] + '.pdf'
+                pdf_path = os.path.join(CVS_DIR, pdf_name)
+                if os.path.exists(pdf_path):
+                    return pdf_path
+        except Exception:
+            pass
     # Fallback: copy DOCX as-is
     dest = os.path.join(CVS_DIR, os.path.basename(docx_path))
     shutil.copy2(docx_path, dest)
@@ -61,7 +70,7 @@ def _to_pdf(docx_path: str) -> str:
 def _extract_requirements(description: str) -> str:
     """Extract requirements section from job description."""
     if not description:
-        return ''
+        return 'No especificado'
     patterns = [
         r'(?:requirements?|qualifications?|what we(?:\'re| are) looking for|you (?:have|bring)|your profile'
         r'|requisitos?|perfil|experiencia requerida)[:\s]*\n((?:[-•*]\s*.+\n?){1,8})',
@@ -70,14 +79,14 @@ def _extract_requirements(description: str) -> str:
         m = re.search(pattern, description, re.IGNORECASE)
         if m:
             return m.group(1).strip()[:300]
-    # Fallback: return first 200 chars of description
-    return ''
+    # Fallback: no explicit requirements section — use a description excerpt
+    return description.strip()[:300]
 
 
 def _extract_salary(description: str) -> str:
     """Try to extract salary/compensation info from description."""
     if not description:
-        return ''
+        return 'No especificado'
     patterns = [
         r'(?:salary|compensation|package|gehalt|salario)[:\s]*([€$£]?\s*[\d,\.]+(?:\s*[-–]\s*[\d,\.]+)?(?:\s*[kKmM])?(?:\s*(?:EUR|USD|GBP|ATS))?)',
         r'([€$£]\s*[\d,\.]+(?:\s*[-–]\s*[\d,\.]+)?\s*(?:per year|p\.a\.|annual|k)?)',
@@ -87,7 +96,7 @@ def _extract_salary(description: str) -> str:
         m = re.search(pattern, description, re.IGNORECASE)
         if m:
             return m.group(1).strip()[:60]
-    return ''
+    return 'No especificado'
 
 
 def _create_excel():

@@ -503,6 +503,10 @@ def _is_location_eligible(location: str, description: str) -> bool:
     if any(k in loc for k in AUSTRIA_KW):
         return True
 
+    # DACH (Germany & Switzerland): all work modes allowed (location field only)
+    if any(k in loc for k in DACH_KW):
+        return True
+
     # Non-Austria: reject hybrid immediately
     if any(k in combined for k in HYBRID_SIGNALS):
         return False

@@ -388,7 +388,8 @@ def _build_cv_docx(tailored: dict, job: dict) -> str:
         p.paragraph_format.space_after = Pt(2)
         run = p.add_run(f"{edu['degree']}  —  {edu['institution']}, {edu['location']}")
         _set_font(run, size=10.5, bold=True)
-        run2 = p.add_run(f"  ({edu['start']} – {edu['end']})")
+        date_range = edu['end'] if edu['start'] == edu['end'] else f"{edu['start']} – {edu['end']}"
+        run2 = p.add_run(f"  ({date_range})")
         _set_font(run2, size=9.5, color=(107, 114, 128))
 
     # Languages + Software
@@ -479,11 +480,7 @@ def _build_letter_docx(tailored: dict, _job: dict, para_keys: list[str],
 
     # Austria work authorization (cover letter only)
     if auth_paragraph:
-        auth_text = (
-            "I currently hold legal residence in Austria and am fully eligible "
-            "to live and work locally without any sponsorship requirement."
-        )
-        p = doc.add_paragraph(auth_text)
+        p = doc.add_paragraph(STRUCTURE['austria_paragraph'])
         for run in p.runs:
             _set_font(run, size=11)
         p.paragraph_format.space_after = Pt(8)
